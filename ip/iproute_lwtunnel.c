@@ -442,7 +442,7 @@ static int parse_encap_mpls(struct rtattr *rta, size_t len,
 static int parse_encap_ip(struct rtattr *rta, size_t len,
 			  int *argcp, char ***argvp)
 {
-	int id_ok = 0, dst_ok = 0, tos_ok = 0, ttl_ok = 0;
+	int id_ok = 0, src_ok = 0, dst_ok = 0, tos_ok = 0, ttl_ok = 0;
 	char **argv = *argvp;
 	int argc = *argcp;
 
@@ -456,6 +456,15 @@ static int parse_encap_ip(struct rtattr *rta, size_t len,
 			if (get_be64(&id, *argv, 0))
 				invarg("\"id\" value is invalid\n", *argv);
 			rta_addattr64(rta, len, LWTUNNEL_IP_ID, id);
+		} else if (strcmp(*argv, "src") == 0) {
+			inet_prefix addr;
+
+			NEXT_ARG();
+			if (src_ok++)
+				duparg2("src", *argv);
+			get_addr(&addr, *argv, AF_INET);
+			rta_addattr_l(rta, len, LWTUNNEL_IP_SRC,
+				      &addr.data, addr.bytelen);
 		} else if (strcmp(*argv, "dst") == 0) {
 			inet_prefix addr;
 
@@ -548,7 +557,7 @@ static int parse_encap_ila(struct rtattr *rta, size_t len,
 static int parse_encap_ip6(struct rtattr *rta, size_t len,
 			   int *argcp, char ***argvp)
 {
-	int id_ok = 0, dst_ok = 0, tos_ok = 0, ttl_ok = 0;
+	int id_ok = 0, src_ok = 0, dst_ok = 0, tos_ok = 0, ttl_ok = 0;
 	char **argv = *argvp;
 	int argc = *argcp;
 
@@ -562,6 +571,15 @@ static int parse_encap_ip6(struct rtattr *rta, size_t len,
 			if (get_be64(&id, *argv, 0))
 				invarg("\"id\" value is invalid\n", *argv);
 			rta_addattr64(rta, len, LWTUNNEL_IP6_ID, id);
+		} else if (strcmp(*argv, "src") == 0) {
+			inet_prefix addr;
+
+			NEXT_ARG();
+			if (src_ok++)
+				duparg2("src", *argv);
+			get_addr(&addr, *argv, AF_INET);
+			rta_addattr_l(rta, len, LWTUNNEL_IP_SRC,
+				      &addr.data, addr.bytelen);
 		} else if (strcmp(*argv, "dst") == 0) {
 			inet_prefix addr;
 

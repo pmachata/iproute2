@@ -189,10 +189,13 @@ throw " | " unreachable " | " prohibit " | " blackhole " | " nat " ]"
 .ti -8
 .IR ENCAP_IP " := "
 .B ip
+.R " [ "
 .B id
-.IR TUNNEL_ID
+.IR TUNNEL_ID " ] [ "
+.B  src
+.IR LOCAL_IP " ] [ "
 .B  dst
-.IR REMOTE_IP " [ "
+.IR REMOTE_IP " ] [ "
 .B tos
 .IR TOS " ] ["
 .B  ttl
@@ -696,10 +699,13 @@ is a set of encapsulation attributes specific to the
 
 .B ip
 .in +2
+.R " [ "
 .B id
-.I TUNNEL_ID
+.IR TUNNEL_ID " ] [ "
+.B  src
+.IR LOCAL_IP " ] [ "
 .B  dst
-.IR REMOTE_IP " [ "
+.IR REMOTE_IP " ] [ "
 .B tos
 .IR TOS " ] ["
 .B  ttl
