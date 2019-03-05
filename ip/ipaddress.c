@@ -27,6 +27,7 @@
 #include <linux/netdevice.h>
 #include <linux/if_arp.h>
 #include <linux/if_infiniband.h>
+#include <linux/if_link.h>
 #include <linux/sockios.h>
 #include <linux/net_namespace.h>
 
@@ -875,6 +876,33 @@ static void print_link_event(FILE *f, __u32 event)
 	}
 }
 
+static void print_link_down_reason(FILE *fp, struct rtattr **tb)
+{
+	int major, minor = 0;
+
+#define PRINT_MAJOR(reason)						\
+	case RTNL_LDR_##reason:						\
+		print_string(PRINT_ANY, "major", "%s ", #reason);	\
+		break;
+
+	major = rta_getattr_u32(tb[IFLA_LINK_DOWN_REASON_MAJOR]);
+	if (tb[IFLA_LINK_DOWN_REASON_MINOR])
+		minor = rta_getattr_u32(tb[IFLA_LINK_DOWN_REASON_MINOR]);
+
+	print_string(PRINT_FP, NULL, "down_reason ", NULL);
+	open_json_object("down_reason");
+
+	switch (major) {
+		RTNL_LINK_DOWN_REASONS(PRINT_MAJOR)
+	default:
+		print_int(PRINT_ANY, "major", "%u ", major);
+	}
+
+	print_int(PRINT_ANY, "minor", "%u ", minor);
+	close_json_object();
+#undef PRINT_MAJOR
+}
+
 int print_linkinfo(struct nlmsghdr *n, void *arg)
 {
 	FILE *fp = (FILE *)arg;
@@ -1144,6 +1172,9 @@ int print_linkinfo(struct nlmsghdr *n, void *arg)
 						   RTA_PAYLOAD(tb[IFLA_PHYS_SWITCH_ID]),
 						   b1, sizeof(b1)));
 		}
+
+		if (tb[IFLA_LINK_DOWN_REASON_MAJOR])
+			print_link_down_reason(fp, tb);
 	}
 
 	if ((do_link || show_details) && tb[IFLA_IFALIAS]) {
