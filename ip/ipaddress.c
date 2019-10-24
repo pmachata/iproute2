@@ -611,6 +611,8 @@ static void print_vf_stats64(FILE *fp, struct rtattr *vfstats)
 
 static void __print_link_stats(FILE *fp, struct rtattr *tb[])
 {
+	const struct rtattr *carrier_down_count = tb[IFLA_CARRIER_DOWN_COUNT];
+	const struct rtattr *carrier_up_count = tb[IFLA_CARRIER_UP_COUNT];
 	const struct rtattr *carrier_changes = tb[IFLA_CARRIER_CHANGES];
 	struct rtnl_link_stats64 _s, *s = &_s;
 	int ret;
@@ -754,6 +756,25 @@ static void __print_link_stats(FILE *fp, struct rtattr *tb[])
 				print_num(fp, 7,
 					  rta_getattr_u32(carrier_changes));
 		}
+
+                bool show_line_2 = carrier_up_count || carrier_down_count;
+                if (show_stats > 1 && show_line_2) {
+                        fprintf(fp, "%s", _SL_);
+                        fprintf(fp, "              ");
+                        if (carrier_up_count)
+                                fprintf(fp, " ups    ");
+                        if (carrier_down_count)
+                                fprintf(fp, " downs  ");
+                        fprintf(fp, "%s", _SL_);
+                        fprintf(fp, "               ");
+                        if (carrier_up_count)
+                                print_num(fp, 7,
+                                    rta_getattr_u32(carrier_up_count));
+                        if (carrier_down_count)
+                            print_num(fp, 7,
+                                        rta_getattr_u32(carrier_down_count));
+                }
+
 	}
 }
 
