@@ -90,10 +90,9 @@ static int tc_qevent_modify(int cmd, unsigned int flags, int argc, char **argv)
 	}
 
 	addattr_l(&req.n, sizeof(req), TCA_KIND, qe->id, strlen(qe->id) + 1);
-	tail = addattr_nest(&req.n, MAX_MSG, TCA_OPTIONS);
+	tail = addattr_nest(&req.n, MAX_MSG, TCA_OPTIONS | NLA_F_NESTED);
 	if (qe->parse_qevent(qe, &argc, &argv, &req.n))
 		return 1;
-	addattr_nest_end(&req.n, tail);
 
 	if (!argc) {
 		if (cmd == RTM_NEWQEVENT)
@@ -102,7 +101,8 @@ static int tc_qevent_modify(int cmd, unsigned int flags, int argc, char **argv)
 		usage();
 	} else if (matches(*argv, "action") == 0) {
 		NEXT_ARG();
-		if (parse_action(&argc, &argv, TCA_QEVENT_ACT, &req.n))
+		if (parse_action(&argc, &argv, TCA_QEVENT_ACT | NLA_F_NESTED,
+				 &req.n))
 			return -1;
 	} else {
 		fprintf(stderr, "%s\n", *argv);
@@ -110,6 +110,8 @@ static int tc_qevent_modify(int cmd, unsigned int flags, int argc, char **argv)
 		fprintf(stderr, "Expected \"action\"\n");
 		return -1;
 	}
+
+	addattr_nest_end(&req.n, tail);
 
 	if (rtnl_talk(&rth, &req.n, NULL) < 0) {
 		fprintf(stderr, "We have an error talking to the kernel\n");
