@@ -22,14 +22,22 @@
 #include "utils.h"
 #include "tc_common.h"
 #include "tc_util.h"
+#include "tc_qevent.h"
 
 static void explain(void)
 {
-	fprintf(stderr, "Usage: ... <[p|b]fifo | pfifo_head_drop> [ limit NUMBER ]\n");
+	fprintf(stderr, "Usage: ... <[p|b]fifo | pfifo_head_drop> [ limit NUMBER ]\n"
+		"		[qevent tail_drop block IDX]\n");
 }
 
+static struct qevent_plain fifo_qe_tail_drop = {};
+static struct qevent_util fifo_qevents[] = {
+	QEVENT("tail_drop", plain, &fifo_qe_tail_drop, TCA_FIFO_TAIL_DROP_BLOCK),
+	{},
+};
+
 static int fifo_parse_opt(struct qdisc_util *qu, int argc, char **argv,
-			  __u32 *p_limit, bool *p_has_limit)
+			  __u32 *p_limit, bool *p_has_limit, struct qevent_util *qevents)
 {
 	while (argc > 0) {
 		if (strcmp(*argv, "limit") == 0) {
@@ -39,6 +47,11 @@ static int fifo_parse_opt(struct qdisc_util *qu, int argc, char **argv,
 				return -1;
 			}
 			*p_has_limit = true;
+		} else if (matches(*argv, "qevent") == 0) {
+			NEXT_ARG();
+			if (qevent_parse(qevents, &argc, &argv))
+				return -1;
+			continue;
 		} else if (strcmp(*argv, "help") == 0) {
 			explain();
 			return -1;
@@ -66,7 +79,8 @@ static int fifo_parse_opt_newstyle(struct qdisc_util *qu, int argc, char **argv,
 	__u32 limit;
 	int err;
 
-	err = fifo_parse_opt(qu, argc, argv, &limit, &has_limit);
+	qevents_init(fifo_qevents);
+	err = fifo_parse_opt(qu, argc, argv, &limit, &has_limit, fifo_qevents);
 	if (err)
 		return err;
 
@@ -74,6 +88,7 @@ static int fifo_parse_opt_newstyle(struct qdisc_util *qu, int argc, char **argv,
 		return 0;
 
 	addattr32(&opt.n, TCA_BUF_MAX, TCA_FIFO_LIMIT, limit);
+	qevents_dump(fifo_qevents, &opt.n);
 	addattr_l(n, 1024, TCA_OPTIONS | NLA_F_NESTED, NLMSG_DATA(&opt.n),
 		  NLMSG_PAYLOAD(&opt.n, 0));
 	return 0;
@@ -86,7 +101,7 @@ static int fifo_parse_opt_oldstyle(struct qdisc_util *qu, int argc, char **argv,
 	bool has_limit = false;
 	int err;
 
-	err = fifo_parse_opt(qu, argc, argv, &opt.limit, &has_limit);
+	err = fifo_parse_opt(qu, argc, argv, &opt.limit, &has_limit, NULL);
 	if (err)
 		return err;
 
@@ -123,6 +138,11 @@ static int fifo_print_opt_newstyle(struct qdisc_util *qu, FILE *f, struct rtattr
 
 	limit = rta_getattr_u32(tb[TCA_FIFO_LIMIT]);
 	fifo_print_limit(qu, f, limit);
+
+	qevents_init(fifo_qevents);
+	if (qevents_read(fifo_qevents, tb))
+		return -1;
+	qevents_print(fifo_qevents, f);
 
 	return 0;
 }

@@ -13,6 +13,8 @@ packets
 .B tc qdisc ... add bfifo
 .B [ limit
 bytes
+.B ] [ qevent tail_drop block
+index
 .B ]
 
 .SH DESCRIPTION
@@ -46,6 +48,14 @@ For bfifo, it defaults to the txqueuelen multiplied by the interface MTU.
 The range for this parameter is [0, UINT32_MAX] bytes.
 
 Note: The link layer header was considered when counting packets length.
+
+.SH QEVENTS
+See tc (8) for some general notes about qevents. pFIFO and bFIFO qdiscs support
+the following qevents:
+
+.TP
+tail_drop
+The associated block is executed when packets are dropped.
 
 .SH OUTPUT
 The output of
