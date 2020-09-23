@@ -1,0 +1,120 @@
+* The Language
+** Command Structure
+   The tool will have the following overall command line syntax:
+
+   : dcb <subset> <command> dev <if> <command-specific options>
+
+   The following subsets are currently foreseen:
+
+   - dcb ets
+   - dcb pfc
+   - dcb buffer
+   - dcb app
+
+   The list of available commands differs by the subset, but at least "show" is
+   always available, and implied if no other command is given.
+
+   The argument "dev <if>" selects a netdevice to operate on. For now I imagine
+   it as mandatory.
+
+** Arrays
+   Many of the DCB structures contain arrays of items, e.g. buffer sizes, buffer
+   indices, traffic class indices, etc. To allow setting a number of them in one
+   go, the tool will accept lists of <key>:<value> pairs allowing override of
+   any or all array members:
+
+   : dcb ets set dev eth0 prio-tc 0:0 1:1
+
+   The value of unmentioned elements is not changed. The tool queries the
+   original record and adjusts only the values mentioned on the command line.
+
+   This key-value syntax is natural for TCs, priorities and similar types of
+   entities, but seems odd for buffer sizes. Nonetheless it has the same
+   advantages there as well (possibility to override any and all elements in one
+   go). I would therefore choose to be consistent with the rest of the dcb tool,
+   rather than going with e.g. the devlink pool syntax.
+
+   Keys can be given with non-decimal bases, with the usual notation. Some
+   structures may permit symbolic names instead of code points. (Notably this is
+   the case for DSCP APP entries.)
+
+   A special key "all" is permitted in the first position. That sets the value
+   of all members to the same value. I imagine it will be useful for resetting
+   back to defaults and similar.
+
+   : dcb ets set dev eth0 prio-tc all:0 7:1
+
+** Structures
+   All of the DCB configurables are kept by the kernel as structures. In order
+   to make it possible to specify the full structure in one go, the tool should
+   make it possible to specify a number of attributes one after another:
+
+   : dcb pfc set dev eth0 macsec-bypass off pfc all:off 1:on delay 1000
+   :                      ^^^^^^^^^^^^^^^^^ ^^^^^^^^^^^^^^^^ ^^^^^^^^^^
+
+* ETS
+  - dcb ets show dev <DEV>
+  - dcb ets set dev <DEV> ...
+    - ... willing {on | off}
+    - ... [recommended] tc-tsa <TC>:{strict | cbs | ets | vendor} [...]
+    - ... [tx | rx | recommended] tc-bw <TC>:B [...]
+    - ... [recommended] prio-tc <P>:<TC> [...]
+
+** examples
+   : dcb ets set dev <DEV> prio-tc 7:7 6:6 5:5 4:4 3:3 2:2 1:1 0:0 \
+   :                       tc-tsa 7:strict 6:strict 5:ets 4:ets 3:ets 2:ets 1:ets 0:ets \
+   :                       tc-bw                    5:20  4:20  3:15  2:15  1:15  0:15
+
+* PFC
+  - dcb pfc show dev <DEV>
+  - dcb pfc set dev <DEV> ...
+    - ... macsec-bypass {on | off}
+    - ... delay D
+    - ... pfc <P>:{on | off} [...]
+
+** examples
+   : dcb pfc set dev <DEV> pfc all:off 7:on 6:on delay 16384
+
+* Buffer
+  - dcb buffer show dev <DEV>
+  - dcb buffer set dev <DEV> ...
+    - ... buffer-size <B>:S [...]
+    - ... prio-buffer <P>:<B> [...]
+
+** examples
+   : dcb buffer set dev <DEV> prio-buf 7:2 6:1 5:0 4:0 3:0 2:0 1:0 0:0 \
+   :                          buffer-size 2:50K 1:50K 0:10K
+
+* APP
+  The syntax "all:<X>" does not make sense for APP entries. The reason is that
+  in the case of APP there are no "existing" entries besides those that the user
+  explicitly adds. I think the usual use cases will be covered by adding a
+  "replace" (add followed by del of all keys besides the added one) and "flush"
+  (del of all keys).
+
+  - dcb app show dev <DEV> [{default-prio | ethtype-prio | etc. }]
+  - dcb app flush dev <DEV> [{default-prio | ethtype-prio | etc. }]
+  - dcb app {add | del | replace} dev <DEV> ...
+    - ... default-prio <P>
+    - ... ethtype-prio <E>:<P> [...]
+    - ... stream-prio <PORT>:<P> [...]
+    - ... dgram-prio <PORT>:<P> [...]
+    - ... port-prio <PORT>:<P> [...]
+    - ... dscp-prio <D>:<P> [...]
+      <D> is either a number or a symbolic name of a DSCP point.
+  - dcb app change dev <DEV> ...
+    - reset would be an add followed by del of all entries with different keys.
+      - dcb app replace dev X dscp-prio 24:1 # add 24:1
+      - dcb app replace dev X dscp-prio 24:2 # add 24:2, del 24:1
+      - dcb app add     dev X dscp-prio 24:3 # add 24:3
+      - dcb app replace dev X dscp-prio 24:4 # add 24:4, del 24:2, del 24:3
+
+** examples
+   : dcb app flush dev eth0
+   : dcb app add dev eth0 dscp-prio 0:0 cs1:1 cs2:2 cs3:3 cs4:4 cs5:5 cs6:6 cs7:7
+
+* ??? "ip link monitor"
+  - monitoring the nlmon messages? Check out dcbnl_notify()
+* DCBX
+  - getdcbx / setdcbx
+  - getcap is part of CEE. 
