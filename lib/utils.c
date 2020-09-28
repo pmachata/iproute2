@@ -1878,6 +1878,17 @@ bool parse_on_off(const char *msg, const char *realval, int *p_err)
 	return parse_one_of(msg, realval, values_on_off, ARRAY_SIZE(values_on_off), p_err);
 }
 
+void parse_flag_on_off(const char *msg, const char *realval,
+		       unsigned int *p_flags, unsigned int flag, int *p_ret)
+{
+	int on_off = parse_on_off(msg, realval, p_ret);
+
+	if (*p_ret)
+		return;
+
+	set_flag(p_flags, flag, on_off);
+}
+
 int parse_mapping_gen(int *argcp, char ***argvp,
 		      int (*key_cb)(__u32 *keyp, const char *key),
 		      int (*mapping_cb)(__u32 key, char *value, void *data),

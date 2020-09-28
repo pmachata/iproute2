@@ -327,9 +327,19 @@ char *sprint_time64(__s64 time, char *buf);
 int do_batch(const char *name, bool force,
 	     int (*cmd)(int argc, char *argv[], void *user), void *user);
 
+static inline void set_flag(unsigned int *p_flags, unsigned int flag, bool on)
+{
+	if (on)
+		*p_flags |= flag;
+	else
+		*p_flags &= ~flag;
+}
+
 int parse_one_of(const char *msg, const char *realval, const char * const *list,
 		 size_t len, int *p_err);
 bool parse_on_off(const char *msg, const char *realval, int *p_err);
+void parse_flag_on_off(const char *msg, const char *realval,
+		       unsigned int *p_flags, unsigned int flag, int *p_ret);
 
 int parse_mapping_num_all(__u32 *keyp, const char *key);
 int parse_mapping_gen(int *argcp, char ***argvp,
