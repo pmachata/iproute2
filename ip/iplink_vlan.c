@@ -43,12 +43,6 @@ static void explain(void)
 	print_explain(stderr);
 }
 
-static int on_off(const char *msg, const char *arg)
-{
-	fprintf(stderr, "Error: argument of \"%s\" must be \"on\" or \"off\", not \"%s\"\n", msg, arg);
-	return -1;
-}
-
 static int parse_qos_mapping(__u32 key, char *value, void *data)
 {
 	struct nlmsghdr *n = data;
@@ -81,6 +75,7 @@ static int vlan_parse_opt(struct link_util *lu, int argc, char **argv,
 {
 	struct ifla_vlan_flags flags = { 0 };
 	__u16 id, proto;
+	int ret;
 
 	while (argc > 0) {
 		if (matches(*argv, "protocol") == 0) {
@@ -96,48 +91,36 @@ static int vlan_parse_opt(struct link_util *lu, int argc, char **argv,
 		} else if (matches(*argv, "reorder_hdr") == 0) {
 			NEXT_ARG();
 			flags.mask |= VLAN_FLAG_REORDER_HDR;
-			if (strcmp(*argv, "on") == 0)
-				flags.flags |= VLAN_FLAG_REORDER_HDR;
-			else if (strcmp(*argv, "off") == 0)
-				flags.flags &= ~VLAN_FLAG_REORDER_HDR;
-			else
-				return on_off("reorder_hdr", *argv);
+			parse_flag_on_off("reorder_hdr", *argv, &flags.flags, VLAN_FLAG_REORDER_HDR,
+					  &ret);
+			if (ret)
+				return ret;
 		} else if (matches(*argv, "gvrp") == 0) {
 			NEXT_ARG();
 			flags.mask |= VLAN_FLAG_GVRP;
-			if (strcmp(*argv, "on") == 0)
-				flags.flags |= VLAN_FLAG_GVRP;
-			else if (strcmp(*argv, "off") == 0)
-				flags.flags &= ~VLAN_FLAG_GVRP;
-			else
-				return on_off("gvrp", *argv);
+			parse_flag_on_off("gvrp", *argv, &flags.flags, VLAN_FLAG_GVRP, &ret);
+			if (ret)
+				return ret;
 		} else if (matches(*argv, "mvrp") == 0) {
 			NEXT_ARG();
 			flags.mask |= VLAN_FLAG_MVRP;
-			if (strcmp(*argv, "on") == 0)
-				flags.flags |= VLAN_FLAG_MVRP;
-			else if (strcmp(*argv, "off") == 0)
-				flags.flags &= ~VLAN_FLAG_MVRP;
-			else
-				return on_off("mvrp", *argv);
+			parse_flag_on_off("mvrp", *argv, &flags.flags, VLAN_FLAG_MVRP, &ret);
+			if (ret)
+				return ret;
 		} else if (matches(*argv, "loose_binding") == 0) {
 			NEXT_ARG();
 			flags.mask |= VLAN_FLAG_LOOSE_BINDING;
-			if (strcmp(*argv, "on") == 0)
-				flags.flags |= VLAN_FLAG_LOOSE_BINDING;
-			else if (strcmp(*argv, "off") == 0)
-				flags.flags &= ~VLAN_FLAG_LOOSE_BINDING;
-			else
-				return on_off("loose_binding", *argv);
+			parse_flag_on_off("loose_binding", *argv, &flags.flags,
+					  VLAN_FLAG_LOOSE_BINDING, &ret);
+			if (ret)
+				return ret;
 		} else if (matches(*argv, "bridge_binding") == 0) {
 			NEXT_ARG();
 			flags.mask |= VLAN_FLAG_BRIDGE_BINDING;
-			if (strcmp(*argv, "on") == 0)
-				flags.flags |= VLAN_FLAG_BRIDGE_BINDING;
-			else if (strcmp(*argv, "off") == 0)
-				flags.flags &= ~VLAN_FLAG_BRIDGE_BINDING;
-			else
-				return on_off("bridge_binding", *argv);
+			parse_flag_on_off("bridge_binding", *argv, &flags.flags,
+					  VLAN_FLAG_BRIDGE_BINDING, &ret);
+			if (ret)
+				return ret;
 		} else if (matches(*argv, "ingress-qos-map") == 0) {
 			NEXT_ARG();
 			if (vlan_parse_qos_map(&argc, &argv, n,
