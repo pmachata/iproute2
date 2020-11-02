@@ -108,7 +108,12 @@ bool matches_color(const char *arg, int *val)
 	if (matches(dup, "-color"))
 		return false;
 
-	if (*p == '\0' || !strcmp(p, "always"))
+	return matches_color_arg(p, val);
+}
+
+bool matches_color_arg(const char *p, int *val)
+{
+	if (p == NULL || *p == '\0' || !strcmp(p, "always"))
 		*val = COLOR_OPT_ALWAYS;
 	else if (!strcmp(p, "auto"))
 		*val = COLOR_OPT_AUTO;

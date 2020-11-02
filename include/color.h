@@ -22,6 +22,7 @@ enum color_opt {
 
 bool check_enable_color(int color, int json);
 bool matches_color(const char *arg, int *val);
+bool matches_color_arg(const char *p, int *val);
 int color_fprintf(FILE *fp, enum color_attr attr, const char *fmt, ...);
 enum color_attr ifa_family_color(__u8 ifa_family);
 enum color_attr oper_state_color(__u8 state);
