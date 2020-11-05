@@ -511,6 +511,7 @@ int main(int argc, char **argv)
 	static const struct option long_options[] = {
 		{ "Version",		no_argument,		NULL, 'V' },
 		{ "force",		no_argument,		NULL, 'f' },
+		{ "color",		optional_argument,	NULL, 'c' },
 		{ "batch",		required_argument,	NULL, 'b' },
 		{ "iec",		no_argument,		NULL, 'i' },
 		{ "json",		no_argument,		NULL, 'j' },
@@ -524,6 +525,7 @@ int main(int argc, char **argv)
 	const char *batch_file = NULL;
 	bool force = false;
 	struct dcb *dcb;
+	int color = 0;
 	int opt;
 	int err;
 	int ret;
@@ -534,7 +536,7 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	while ((opt = getopt_long(argc, argv, "b:fhijn:psvNV",
+	while ((opt = getopt_long(argc, argv, "b:c::fhijn:psvNV",
 				  long_options, NULL)) >= 0) {
 
 		switch (opt) {
@@ -547,6 +549,12 @@ int main(int argc, char **argv)
 			break;
 		case 'b':
 			batch_file = optarg;
+			break;
+		case 'c':
+			if (!matches_color_arg(optarg, &color)) {
+				fprintf(stderr, "Invalid color argument: %s\n", optarg);
+				return 1;
+			}
 			break;
 		case 'j':
 			dcb->json_output = true;
@@ -588,6 +596,8 @@ int main(int argc, char **argv)
 		ret = EXIT_FAILURE;
 		goto dcb_free;
 	}
+
+	check_enable_color(color, dcb->json_output);
 
 	if (batch_file)
 		err = dcb_batch(dcb, batch_file, force);
