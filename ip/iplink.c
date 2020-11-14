@@ -133,14 +133,6 @@ static void usage(void)
 	iplink_usage();
 }
 
-static int on_off(const char *msg, const char *realval)
-{
-	fprintf(stderr,
-		"Error: argument of \"%s\" must be \"on\" or \"off\", not \"%s\"\n",
-		msg, realval);
-	return -1;
-}
-
 static void *BODY;		/* cached dlopen(NULL) handle */
 static struct link_util *linkutil_list;
 
@@ -678,52 +670,46 @@ int iplink_parse(int argc, char **argv, struct iplink_req *req, char **type)
 			NEXT_ARG();
 			req->i.ifi_change |= IFF_MULTICAST;
 
-			if (strcmp(*argv, "on") == 0)
-				req->i.ifi_flags |= IFF_MULTICAST;
-			else if (strcmp(*argv, "off") == 0)
-				req->i.ifi_flags &= ~IFF_MULTICAST;
-			else
-				return on_off("multicast", *argv);
+			parse_flag_on_off("multicast", *argv, &req->i.ifi_flags,
+					  IFF_MULTICAST, &err);
+			if (err)
+				return err;
 		} else if (strcmp(*argv, "allmulticast") == 0) {
 			NEXT_ARG();
 			req->i.ifi_change |= IFF_ALLMULTI;
 
-			if (strcmp(*argv, "on") == 0)
-				req->i.ifi_flags |= IFF_ALLMULTI;
-			else if (strcmp(*argv, "off") == 0)
-				req->i.ifi_flags &= ~IFF_ALLMULTI;
-			else
-				return on_off("allmulticast", *argv);
+			parse_flag_on_off("allmulticast", *argv, &req->i.ifi_flags,
+					  IFF_ALLMULTI, &err);
+			if (err)
+				return err;
 		} else if (strcmp(*argv, "promisc") == 0) {
 			NEXT_ARG();
 			req->i.ifi_change |= IFF_PROMISC;
 
-			if (strcmp(*argv, "on") == 0)
-				req->i.ifi_flags |= IFF_PROMISC;
-			else if (strcmp(*argv, "off") == 0)
-				req->i.ifi_flags &= ~IFF_PROMISC;
-			else
-				return on_off("promisc", *argv);
+			parse_flag_on_off("promisc", *argv, &req->i.ifi_flags,
+					  IFF_PROMISC, &err);
+			if (err)
+				return err;
 		} else if (strcmp(*argv, "trailers") == 0) {
+			int on_off;
+
 			NEXT_ARG();
 			req->i.ifi_change |= IFF_NOTRAILERS;
 
-			if (strcmp(*argv, "off") == 0)
-				req->i.ifi_flags |= IFF_NOTRAILERS;
-			else if (strcmp(*argv, "on") == 0)
-				req->i.ifi_flags &= ~IFF_NOTRAILERS;
-			else
-				return on_off("trailers", *argv);
+			on_off = parse_on_off("trailers", *argv, &err);
+			if (err)
+				return err;
+			set_flag(&req->i.ifi_flags, IFF_NOTRAILERS, !on_off);
 		} else if (strcmp(*argv, "arp") == 0) {
+			int on_off;
+
 			NEXT_ARG();
 			req->i.ifi_change |= IFF_NOARP;
 
-			if (strcmp(*argv, "on") == 0)
-				req->i.ifi_flags &= ~IFF_NOARP;
-			else if (strcmp(*argv, "off") == 0)
-				req->i.ifi_flags |= IFF_NOARP;
-			else
-				return on_off("arp", *argv);
+			on_off = parse_on_off("arp", *argv, &err);
+			if (err)
+				return err;
+			set_flag(&req->i.ifi_flags, IFF_NOARP, !on_off);
 		} else if (strcmp(*argv, "carrier") == 0) {
 			int carrier;
 
@@ -781,12 +767,10 @@ int iplink_parse(int argc, char **argv, struct iplink_req *req, char **type)
 			NEXT_ARG();
 			req->i.ifi_change |= IFF_DYNAMIC;
 
-			if (strcmp(*argv, "on") == 0)
-				req->i.ifi_flags |= IFF_DYNAMIC;
-			else if (strcmp(*argv, "off") == 0)
-				req->i.ifi_flags &= ~IFF_DYNAMIC;
-			else
-				return on_off("dynamic", *argv);
+			parse_flag_on_off("dynamic", *argv, &req->i.ifi_flags,
+					  IFF_DYNAMIC, &err);
+			if (err)
+				return err;
 		} else if (matches(*argv, "type") == 0) {
 			NEXT_ARG();
 			*type = *argv;
@@ -897,12 +881,9 @@ int iplink_parse(int argc, char **argv, struct iplink_req *req, char **type)
 				invarg("invalid protodown reason\n", *argv);
 			NEXT_ARG();
 			prmask = 1 << preason;
-			if (matches(*argv, "on") == 0)
-				prvalue |= prmask;
-			else if (matches(*argv, "off") == 0)
-				prvalue &= ~prmask;
-			else
-				return on_off("protodown_reason", *argv);
+			parse_flag_on_off("protodown_reason", *argv, &prvalue, prmask, &ret);
+			if (ret)
+				return ret;
 			pr = addattr_nest(&req->n, sizeof(*req),
 					  IFLA_PROTO_DOWN_REASON | NLA_F_NESTED);
 			addattr32(&req->n, sizeof(*req),
@@ -1327,6 +1308,7 @@ static int do_set(int argc, char **argv)
 	struct ifreq ifr0, ifr1;
 	char *newname = NULL;
 	int htype, halen;
+	int ret;
 
 	while (argc > 0) {
 		if (strcmp(*argv, "up") == 0) {
@@ -1364,63 +1346,41 @@ static int do_set(int argc, char **argv)
 		} else if (strcmp(*argv, "multicast") == 0) {
 			NEXT_ARG();
 			mask |= IFF_MULTICAST;
-
-			if (strcmp(*argv, "on") == 0)
-				flags |= IFF_MULTICAST;
-			else if (strcmp(*argv, "off") == 0)
-				flags &= ~IFF_MULTICAST;
-			else
-				return on_off("multicast", *argv);
+			parse_flag_on_off("multicast", *argv, &flags, IFF_MULTICAST, &ret);
+			if (ret)
+				return ret;
 		} else if (strcmp(*argv, "allmulticast") == 0) {
 			NEXT_ARG();
 			mask |= IFF_ALLMULTI;
-
-			if (strcmp(*argv, "on") == 0)
-				flags |= IFF_ALLMULTI;
-			else if (strcmp(*argv, "off") == 0)
-				flags &= ~IFF_ALLMULTI;
-			else
-				return on_off("allmulticast", *argv);
+			parse_flag_on_off("allmulticast", *argv, &flags, IFF_ALLMULTI, &ret);
 		} else if (strcmp(*argv, "promisc") == 0) {
 			NEXT_ARG();
 			mask |= IFF_PROMISC;
-
-			if (strcmp(*argv, "on") == 0)
-				flags |= IFF_PROMISC;
-			else if (strcmp(*argv, "off") == 0)
-				flags &= ~IFF_PROMISC;
-			else
-				return on_off("promisc", *argv);
+			parse_flag_on_off("promisc", *argv, &flags, IFF_PROMISC, &ret);
 		} else if (strcmp(*argv, "trailers") == 0) {
+			int on_off;
+
 			NEXT_ARG();
 			mask |= IFF_NOTRAILERS;
-
-			if (strcmp(*argv, "off") == 0)
-				flags |= IFF_NOTRAILERS;
-			else if (strcmp(*argv, "on") == 0)
-				flags &= ~IFF_NOTRAILERS;
-			else
-				return on_off("trailers", *argv);
+			on_off = parse_on_off("trailers", *argv, &ret);
+			if (ret)
+				return ret;
+			set_flag(&flags, IFF_NOTRAILERS, !on_off);
 		} else if (strcmp(*argv, "arp") == 0) {
+			int on_off;
+
 			NEXT_ARG();
 			mask |= IFF_NOARP;
-
-			if (strcmp(*argv, "on") == 0)
-				flags &= ~IFF_NOARP;
-			else if (strcmp(*argv, "off") == 0)
-				flags |= IFF_NOARP;
-			else
-				return on_off("arp", *argv);
+			on_off = parse_on_off("arp", *argv, &ret);
+			if (ret)
+				return ret;
+			set_flag(&flags, IFF_NOARP, !on_off);
 		} else if (matches(*argv, "dynamic") == 0) {
 			NEXT_ARG();
 			mask |= IFF_DYNAMIC;
-
-			if (strcmp(*argv, "on") == 0)
-				flags |= IFF_DYNAMIC;
-			else if (strcmp(*argv, "off") == 0)
-				flags &= ~IFF_DYNAMIC;
-			else
-				return on_off("dynamic", *argv);
+			parse_flag_on_off("dynamic", *argv, &flags, IFF_DYNAMIC, &ret);
+			if (ret)
+				return ret;
 		} else {
 			if (strcmp(*argv, "dev") == 0)
 				NEXT_ARG();
