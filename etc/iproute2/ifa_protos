@@ -1,0 +1,7 @@
+#
+# Reserved protocols.
+#
+0	unspec
+1	static
+2	dhcp
+3	bootp

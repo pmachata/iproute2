@@ -17,6 +17,7 @@ struct link_filter {
 	inet_prefix pfx;
 	int scope, scopemask;
 	int flags, flagmask;
+	int proto, protomask;
 	int up;
 	char *label;
 	int flushed;

@@ -62,6 +62,7 @@ static void usage(void)
 		"IFADDR := PREFIX | ADDR peer PREFIX\n"
 		"          [ broadcast ADDR ] [ anycast ADDR ]\n"
 		"          [ label IFNAME ] [ scope SCOPE-ID ] [ metric METRIC ]\n"
+		"          [ proto IFAPROTO ]\n"
 		"SCOPE-ID := [ host | link | global | NUMBER ]\n"
 		"FLAG-LIST := [ FLAG-LIST ] FLAG\n"
 		"FLAG  := [ permanent | dynamic | secondary | primary |\n"
@@ -1565,6 +1566,9 @@ int print_addrinfo(struct nlmsghdr *n, void *arg)
 		return 0;
 	if ((filter.flags ^ ifa_flags) & filter.flagmask)
 		return 0;
+	if (rta_tb[IFA_PROTO])
+		if ((filter.proto ^ rta_getattr_u32(rta_tb[IFA_PROTO])) & filter.protomask)
+			return 0;
 
 	if (filter.family && filter.family != ifa->ifa_family)
 		return 0;
@@ -1674,6 +1678,16 @@ int print_addrinfo(struct nlmsghdr *n, void *arg)
 		     rtnl_rtscope_n2a(ifa->ifa_scope, b1, sizeof(b1)));
 
 	print_ifa_flags(fp, ifa, ifa_flags);
+
+	if (rta_tb[IFA_PROTO]) {
+		__u8 prot = rta_getattr_u8(rta_tb[IFA_PROTO]);
+
+		if (prot != IFAPROT_UNSPEC)
+			print_string(PRINT_ANY,
+				     "protocol",
+				     "proto %s ",
+				     rtnl_ifaprot_n2a(prot, b1, sizeof(b1)));
+	}
 
 	if (rta_tb[IFA_LABEL])
 		print_string(PRINT_ANY,
@@ -1928,6 +1942,10 @@ static void ipaddr_filter(struct nlmsg_chain *linfo, struct nlmsg_chain *ainfo)
 
 			if ((filter.flags ^ ifa_flags) & filter.flagmask)
 				continue;
+
+			if (tb[IFA_PROTO])
+				if ((filter.proto ^ rta_getattr_u32(tb[IFA_PROTO])) & filter.protomask)
+					continue;
 
 			if (ifa_label_match_rta(ifa->ifa_index, tb[IFA_LABEL]))
 				continue;
@@ -2196,6 +2214,18 @@ static int ipaddr_list_flush_or_save(int argc, char **argv, int action)
 			} else {
 				filter.kind = *argv;
 			}
+		} else if (strcmp(*argv, "proto") == 0) {
+			unsigned int proto = 0;
+
+			NEXT_ARG();
+			filter.protomask = -1;
+			if (rtnl_ifaprot_a2n(&proto, *argv)) {
+				if (strcmp(*argv, "all") != 0)
+					invarg("invalid \"proto\"\n", *argv);
+				proto = 0;
+				filter.protomask = 0;
+			}
+			filter.proto = proto;
 		} else {
 			if (strcmp(*argv, "dev") == 0)
 				NEXT_ARG();
@@ -2484,6 +2514,13 @@ static int ipaddr_modify(int cmd, int flags, int argc, char **argv)
 		} else if (strcmp(*argv, "dev") == 0) {
 			NEXT_ARG();
 			d = *argv;
+		} else if (strcmp(*argv, "proto") == 0) {
+			__u32 prot;
+
+			NEXT_ARG();
+			if (rtnl_ifaprot_a2n(&prot, *argv))
+				invarg("Invalid \"protocol\" value\n", *argv);
+			addattr8(&req.n, sizeof(req), IFA_PROTO, prot);
 		} else if (strcmp(*argv, "label") == 0) {
 			NEXT_ARG();
 			l = *argv;

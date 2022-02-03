@@ -17,6 +17,7 @@
 
 #include <asm/types.h>
 #include <linux/rtnetlink.h>
+#include <linux/if_addr.h>
 
 #include "rt_names.h"
 #include "utils.h"
@@ -778,6 +779,72 @@ int protodown_reason_a2n(__u32 *id, const char *arg)
 
 	res = strtoul(arg, &end, 0);
 	if (!end || end == arg || *end || res >= PROTODOWN_REASON_NUM_BITS)
+		return -1;
+	*id = res;
+	return 0;
+}
+
+static char *rtnl_ifaprot_tab[256] = {
+	[IFAPROT_UNSPEC]	= "unspec",
+	[IFAPROT_KERNEL_LO]	= "loopback",
+	[IFAPROT_KERNEL_RA]	= "router_announcement",
+	[IFAPROT_KERNEL_LL]	= "link_local",
+};
+
+static int rtnl_ifaprot_init;
+
+static void rtnl_ifaprot_initialize(void)
+{
+	rtnl_ifaprot_init = 1;
+	rtnl_tab_initialize(CONFDIR "/ifa_protos",
+			    rtnl_ifaprot_tab, 256);
+}
+
+const char *rtnl_ifaprot_n2a(int id, char *buf, int len) {
+	if (id < 0 || id >= 256) {
+		snprintf(buf, len, "%d", id);
+		return buf;
+	}
+
+	if (!numeric) {
+		if (!rtnl_ifaprot_tab[id]) {
+			if (!rtnl_ifaprot_init)
+				rtnl_ifaprot_initialize();
+		}
+		if (rtnl_ifaprot_tab[id])
+			return rtnl_ifaprot_tab[id];
+	}
+
+	snprintf(buf, len, "%#02x", id);
+	return buf;
+}
+
+int rtnl_ifaprot_a2n(__u32 *id, const char *arg) {
+	static char *cache;
+	static unsigned long res;
+	char *end;
+	int i;
+
+	if (cache && strcmp(cache, arg) == 0) {
+		*id = res;
+		return 0;
+	}
+
+	if (!rtnl_ifaprot_init)
+		rtnl_ifaprot_initialize();
+
+	for (i = 0; i < 256; i++) {
+		if (rtnl_ifaprot_tab[i] &&
+		    strcmp(rtnl_ifaprot_tab[i], arg) == 0) {
+			cache = rtnl_ifaprot_tab[i];
+			res = i;
+			*id = res;
+			return 0;
+		}
+	}
+
+	res = strtoul(arg, &end, 0);
+	if (!end || end == arg || *end || res > 255)
 		return -1;
 	*id = res;
 	return 0;
