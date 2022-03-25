@@ -91,6 +91,7 @@ int do_seg6(int argc, char **argv);
 int do_ipnh(int argc, char **argv);
 int do_mptcp(int argc, char **argv);
 int do_ioam6(int argc, char **argv);
+int do_ipstats(int argc, char **argv);
 
 int iplink_get(char *name, __u32 filt_mask);
 int iplink_ifla_xstats(int argc, char **argv);
@@ -157,6 +158,23 @@ void xdp_dump(FILE *fp, struct rtattr *tb, bool link, bool details);
 /* iplink_vrf.c */
 __u32 ipvrf_get_table(const char *name);
 int name_is_vrf(const char *name);
+
+/* ipstats.c */
+enum ipstats_stat_desc_kind {
+	IPSTATS_STAT_DESC_KIND_LEAF,
+	IPSTATS_STAT_DESC_KIND_GROUP,
+};
+
+struct ipstats_stat_desc {
+	const char *name;
+	enum ipstats_stat_desc_kind kind;
+	union {
+		struct {
+			const struct ipstats_stat_desc **subs;
+			size_t nsubs;
+		};
+	};
+};
 
 #ifndef	INFINITY_LIFE_TIME
 #define     INFINITY_LIFE_TIME      0xFFFFFFFFU
