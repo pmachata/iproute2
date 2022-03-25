@@ -165,6 +165,9 @@ enum ipstats_stat_desc_kind {
 	IPSTATS_STAT_DESC_KIND_GROUP,
 };
 
+struct ipstats_stat_dump_filters;
+struct ipstats_stat_show_attrs;
+
 struct ipstats_stat_desc {
 	const char *name;
 	enum ipstats_stat_desc_kind kind;
@@ -172,6 +175,12 @@ struct ipstats_stat_desc {
 		struct {
 			const struct ipstats_stat_desc **subs;
 			size_t nsubs;
+		};
+		struct {
+			void (*pack)(struct ipstats_stat_dump_filters *filters,
+				     const struct ipstats_stat_desc *desc);
+			int (*show)(struct ipstats_stat_show_attrs *attrs,
+				    const struct ipstats_stat_desc *desc);
 		};
 	};
 };
