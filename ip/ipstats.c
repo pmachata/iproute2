@@ -612,6 +612,7 @@ int ipstats_stat_desc_show_xstats(struct ipstats_stat_show_attrs *attrs,
 
 static const struct ipstats_stat_desc *ipstats_stat_desc_xstats_subs[] = {
 	&ipstats_stat_desc_xstats_bridge_group,
+	&ipstats_stat_desc_xstats_bond_group,
 };
 
 static const struct ipstats_stat_desc ipstats_stat_desc_xstats_group = {
@@ -623,6 +624,7 @@ static const struct ipstats_stat_desc ipstats_stat_desc_xstats_group = {
 
 static const struct ipstats_stat_desc *ipstats_stat_desc_xstats_slave_subs[] = {
 	&ipstats_stat_desc_xstats_slave_bridge_group,
+	&ipstats_stat_desc_xstats_slave_bond_group,
 };
 
 static const struct ipstats_stat_desc ipstats_stat_desc_xstats_slave_group = {
