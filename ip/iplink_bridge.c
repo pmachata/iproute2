@@ -984,6 +984,7 @@ const struct ipstats_stat_desc ipstats_stat_desc_xstats_bridge_group = {
 	.nsubs = ARRAY_SIZE(ipstats_stat_desc_xstats_bridge_subs),
 };
 
+// xxxxx is it even relevant? STP for bridge slave?
 static const struct ipstats_stat_desc_xstats
 ipstats_stat_desc_xstats_slave_bridge_stp = {
 	.desc = ipstats_stat_desc_bridge_tmpl_stp,
