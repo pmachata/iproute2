@@ -62,6 +62,7 @@ static void usage(void)
 		"IFADDR := PREFIX | ADDR peer PREFIX\n"
 		"          [ broadcast ADDR ] [ anycast ADDR ]\n"
 		"          [ label IFNAME ] [ scope SCOPE-ID ] [ metric METRIC ]\n"
+		"          [ proto ADDRPROTO ]\n"
 		"SCOPE-ID := [ host | link | global | NUMBER ]\n"
 		"FLAG-LIST := [ FLAG-LIST ] FLAG\n"
 		"FLAG  := [ permanent | dynamic | secondary | primary |\n"
@@ -70,7 +71,9 @@ static void usage(void)
 		"CONFFLAG-LIST := [ CONFFLAG-LIST ] CONFFLAG\n"
 		"CONFFLAG  := [ home | nodad | mngtmpaddr | noprefixroute | autojoin ]\n"
 		"LIFETIME := [ valid_lft LFT ] [ preferred_lft LFT ]\n"
-		"LFT := forever | SECONDS\n");
+		"LFT := forever | SECONDS\n"
+		"ADDRPROTO := [ NAME | NUMBER ]\n"
+		);
 	iplink_types_usage();
 
 	exit(-1);
@@ -1675,6 +1678,14 @@ int print_addrinfo(struct nlmsghdr *n, void *arg)
 
 	print_ifa_flags(fp, ifa, ifa_flags);
 
+	if (rta_tb[IFA_PROTO]) {
+		__u8 proto = rta_getattr_u8(rta_tb[IFA_PROTO]);
+
+		if (proto || is_json_context())
+			print_string(PRINT_ANY, "protocol", "proto %s ",
+				     rtnl_addrprot_n2a(proto, b1, sizeof(b1)));
+	}
+
 	if (rta_tb[IFA_LABEL])
 		print_string(PRINT_ANY,
 			     "label",
@@ -2520,6 +2531,13 @@ static int ipaddr_modify(int cmd, int flags, int argc, char **argv)
 			} else {
 				ifa_flags |= flag_data->mask;
 			}
+		} else if (strcmp(*argv, "proto") == 0) {
+			__u8 proto;
+
+			NEXT_ARG();
+			if (get_u8(&proto, *argv, 0))
+				invarg("\"proto\" value is invalid\n", *argv);
+			addattr8(&req.n, sizeof(req), IFA_PROTO, proto);
 		} else {
 			if (strcmp(*argv, "local") == 0)
 				NEXT_ARG();
