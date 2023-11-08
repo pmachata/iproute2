@@ -73,7 +73,7 @@ static int dcb_pfc_parse_mapping_prio_pfc(__u32 key, char *value, void *data)
 
 	dcb_pfc_to_array(pfc_en, pfc->pfc_en);
 
-	enabled = parse_on_off("PFC", value, &ret);
+	enabled = parse_on_off_deprecated("PFC", value, &ret);
 	if (ret)
 		return ret;
 
@@ -185,7 +185,8 @@ static int dcb_cmd_pfc_set(struct dcb *dcb, const char *dev, int argc, char **ar
 			continue;
 		} else if (matches(*argv, "macsec-bypass") == 0) {
 			NEXT_ARG();
-			pfc.mbc = parse_on_off("macsec-bypass", *argv, &ret);
+			pfc.mbc = parse_on_off_deprecated("macsec-bypass",
+							  *argv, &ret);
 			if (ret)
 				return ret;
 		} else if (matches(*argv, "delay") == 0) {

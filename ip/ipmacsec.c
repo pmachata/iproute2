@@ -593,7 +593,8 @@ static int do_offload(enum cmd c, int argc, char **argv)
 	if (argc == 0)
 		ipmacsec_usage();
 
-	offload = parse_one_of("offload", *argv, offload_str, ARRAY_SIZE(offload_str), &ret);
+	offload = parse_one_of_deprecated("offload", *argv, offload_str,
+					  ARRAY_SIZE(offload_str), &ret);
 	if (ret)
 		ipmacsec_usage();
 
@@ -1402,7 +1403,7 @@ static int macsec_parse_opt(struct link_util *lu, int argc, char **argv,
 			NEXT_ARG();
 			int i;
 
-			i = parse_on_off("encrypt", *argv, &ret);
+			i = parse_on_off_deprecated("encrypt", *argv, &ret);
 			if (ret != 0)
 				return ret;
 			addattr8(n, MACSEC_BUFLEN, IFLA_MACSEC_ENCRYPT, i);
@@ -1410,7 +1411,7 @@ static int macsec_parse_opt(struct link_util *lu, int argc, char **argv,
 			NEXT_ARG();
 			int i;
 
-			i = parse_on_off("send_sci", *argv, &ret);
+			i = parse_on_off_deprecated("send_sci", *argv, &ret);
 			if (ret != 0)
 				return ret;
 			send_sci = i;
@@ -1420,7 +1421,7 @@ static int macsec_parse_opt(struct link_util *lu, int argc, char **argv,
 			NEXT_ARG();
 			int i;
 
-			i = parse_on_off("end_station", *argv, &ret);
+			i = parse_on_off_deprecated("end_station", *argv, &ret);
 			if (ret != 0)
 				return ret;
 			es = i;
@@ -1429,7 +1430,7 @@ static int macsec_parse_opt(struct link_util *lu, int argc, char **argv,
 			NEXT_ARG();
 			int i;
 
-			i = parse_on_off("scb", *argv, &ret);
+			i = parse_on_off_deprecated("scb", *argv, &ret);
 			if (ret != 0)
 				return ret;
 			scb = i;
@@ -1438,7 +1439,7 @@ static int macsec_parse_opt(struct link_util *lu, int argc, char **argv,
 			NEXT_ARG();
 			int i;
 
-			i = parse_on_off("protect", *argv, &ret);
+			i = parse_on_off_deprecated("protect", *argv, &ret);
 			if (ret != 0)
 				return ret;
 			addattr8(n, MACSEC_BUFLEN, IFLA_MACSEC_PROTECT, i);
@@ -1446,7 +1447,7 @@ static int macsec_parse_opt(struct link_util *lu, int argc, char **argv,
 			NEXT_ARG();
 			int i;
 
-			i = parse_on_off("replay", *argv, &ret);
+			i = parse_on_off_deprecated("replay", *argv, &ret);
 			if (ret != 0)
 				return ret;
 			replay_protect = !!i;
@@ -1457,8 +1458,10 @@ static int macsec_parse_opt(struct link_util *lu, int argc, char **argv,
 				invarg("expected replay window size", *argv);
 		} else if (strcmp(*argv, "validate") == 0) {
 			NEXT_ARG();
-			validate = parse_one_of("validate", *argv, validate_str,
-						ARRAY_SIZE(validate_str), &ret);
+			validate = parse_one_of_deprecated("validate",
+							   *argv, validate_str,
+							   ARRAY_SIZE(validate_str),
+							   &ret);
 			if (ret != 0)
 				return ret;
 			addattr8(n, MACSEC_BUFLEN,
@@ -1472,8 +1475,10 @@ static int macsec_parse_opt(struct link_util *lu, int argc, char **argv,
 				invarg("expected an { 0..3 }", *argv);
 		} else if (strcmp(*argv, "offload") == 0) {
 			NEXT_ARG();
-			offload = parse_one_of("offload", *argv, offload_str,
-					       ARRAY_SIZE(offload_str), &ret);
+			offload = parse_one_of_deprecated("offload", *argv,
+							  offload_str,
+							  ARRAY_SIZE(offload_str),
+							  &ret);
 			if (ret != 0)
 				return ret;
 			addattr8(n, MACSEC_BUFLEN,

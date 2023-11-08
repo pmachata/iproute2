@@ -374,37 +374,44 @@ static int brlink_modify(int argc, char **argv)
 			d = *argv;
 		} else if (strcmp(*argv, "guard") == 0) {
 			NEXT_ARG();
-			bpdu_guard = parse_on_off("guard", *argv, &ret);
+			bpdu_guard = parse_on_off_deprecated("guard",
+							     *argv, &ret);
 			if (ret)
 				return ret;
 		} else if (strcmp(*argv, "hairpin") == 0) {
 			NEXT_ARG();
-			hairpin = parse_on_off("hairpin", *argv, &ret);
+			hairpin = parse_on_off_deprecated("hairpin",
+							  *argv, &ret);
 			if (ret)
 				return ret;
 		} else if (strcmp(*argv, "fastleave") == 0) {
 			NEXT_ARG();
-			fast_leave = parse_on_off("fastleave", *argv, &ret);
+			fast_leave = parse_on_off_deprecated("fastleave",
+							     *argv, &ret);
 			if (ret)
 				return ret;
 		} else if (strcmp(*argv, "root_block") == 0) {
 			NEXT_ARG();
-			root_block = parse_on_off("root_block", *argv, &ret);
+			root_block = parse_on_off_deprecated("root_block",
+							     *argv, &ret);
 			if (ret)
 				return ret;
 		} else if (strcmp(*argv, "learning") == 0) {
 			NEXT_ARG();
-			learning = parse_on_off("learning", *argv, &ret);
+			learning = parse_on_off_deprecated("learning",
+							   *argv, &ret);
 			if (ret)
 				return ret;
 		} else if (strcmp(*argv, "learning_sync") == 0) {
 			NEXT_ARG();
-			learning_sync = parse_on_off("learning_sync", *argv, &ret);
+			learning_sync = parse_on_off_deprecated("learning_sync",
+								*argv, &ret);
 			if (ret)
 				return ret;
 		} else if (strcmp(*argv, "flood") == 0) {
 			NEXT_ARG();
-			flood = parse_on_off("flood", *argv, &ret);
+			flood = parse_on_off_deprecated("flood",
+							*argv, &ret);
 			if (ret)
 				return ret;
 		} else if (strcmp(*argv, "mcast_router") == 0) {
@@ -412,17 +419,20 @@ static int brlink_modify(int argc, char **argv)
 			mcast_router = atoi(*argv);
 		} else if (strcmp(*argv, "mcast_flood") == 0) {
 			NEXT_ARG();
-			mcast_flood = parse_on_off("mcast_flood", *argv, &ret);
+			mcast_flood = parse_on_off_deprecated("mcast_flood",
+							      *argv, &ret);
 			if (ret)
 				return ret;
 		} else if (strcmp(*argv, "bcast_flood") == 0) {
 			NEXT_ARG();
-			bcast_flood = parse_on_off("bcast_flood", *argv, &ret);
+			bcast_flood = parse_on_off_deprecated("bcast_flood",
+							      *argv, &ret);
 			if (ret)
 				return ret;
 		} else if (strcmp(*argv, "mcast_to_unicast") == 0) {
 			NEXT_ARG();
-			mcast_to_unicast = parse_on_off("mcast_to_unicast", *argv, &ret);
+			mcast_to_unicast = parse_on_off_deprecated("mcast_to_unicast",
+								   *argv, &ret);
 			if (ret)
 				return ret;
 		} else if (strcmp(*argv, "mcast_max_groups") == 0) {
@@ -466,33 +476,37 @@ static int brlink_modify(int argc, char **argv)
 			flags |= BRIDGE_FLAGS_MASTER;
 		} else if (strcmp(*argv, "neigh_suppress") == 0) {
 			NEXT_ARG();
-			neigh_suppress = parse_on_off("neigh_suppress", *argv, &ret);
+			neigh_suppress = parse_on_off_deprecated("neigh_suppress",
+								 *argv, &ret);
 			if (ret)
 				return ret;
 		} else if (strcmp(*argv, "neigh_vlan_suppress") == 0) {
 			NEXT_ARG();
-			neigh_vlan_suppress = parse_on_off("neigh_vlan_suppress",
-							   *argv, &ret);
+			neigh_vlan_suppress =
+				parse_on_off_deprecated("neigh_vlan_suppress",
+							*argv, &ret);
 			if (ret)
 				return ret;
 		} else if (strcmp(*argv, "vlan_tunnel") == 0) {
 			NEXT_ARG();
-			vlan_tunnel = parse_on_off("vlan_tunnel", *argv, &ret);
+			vlan_tunnel = parse_on_off_deprecated("vlan_tunnel",
+							      *argv, &ret);
 			if (ret)
 				return ret;
 		} else if (strcmp(*argv, "isolated") == 0) {
 			NEXT_ARG();
-			isolated = parse_on_off("isolated", *argv, &ret);
+			isolated = parse_on_off_deprecated("isolated",
+							   *argv, &ret);
 			if (ret)
 				return ret;
 		} else if (strcmp(*argv, "locked") == 0) {
 			NEXT_ARG();
-			locked = parse_on_off("locked", *argv, &ret);
+			locked = parse_on_off_deprecated("locked", *argv, &ret);
 			if (ret)
 				return ret;
 		} else if (strcmp(*argv, "mab") == 0) {
 			NEXT_ARG();
-			macauth = parse_on_off("mab", *argv, &ret);
+			macauth = parse_on_off_deprecated("mab", *argv, &ret);
 			if (ret)
 				return ret;
 		} else if (strcmp(*argv, "backup_port") == 0) {

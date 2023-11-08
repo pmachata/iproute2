@@ -470,7 +470,8 @@ static int iplink_parse_vf(int vf, int *argcp, char ***argvp,
 			struct ifla_vf_spoofchk ivs;
 
 			NEXT_ARG();
-			ivs.setting = parse_on_off("spoofchk", *argv, &ret);
+			ivs.setting = parse_on_off_deprecated("spoofchk",
+							      *argv, &ret);
 			if (ret)
 				return ret;
 			ivs.vf = vf;
@@ -481,7 +482,8 @@ static int iplink_parse_vf(int vf, int *argcp, char ***argvp,
 			struct ifla_vf_rss_query_en ivs;
 
 			NEXT_ARG();
-			ivs.setting = parse_on_off("query_rss", *argv, &ret);
+			ivs.setting = parse_on_off_deprecated("query_rss",
+							      *argv, &ret);
 			if (ret)
 				return ret;
 			ivs.vf = vf;
@@ -492,7 +494,8 @@ static int iplink_parse_vf(int vf, int *argcp, char ***argvp,
 			struct ifla_vf_trust ivt;
 
 			NEXT_ARG();
-			ivt.setting = parse_on_off("trust", *argv, &ret);
+			ivt.setting = parse_on_off_deprecated("trust",
+							      *argv, &ret);
 			if (ret)
 				return ret;
 			ivt.vf = vf;
@@ -738,7 +741,8 @@ int iplink_parse(int argc, char **argv, struct iplink_req *req, char **type)
 			int carrier;
 
 			NEXT_ARG();
-			carrier = parse_on_off("carrier", *argv, &err);
+			carrier = parse_on_off_deprecated("carrier",
+							  *argv, &err);
 			if (err)
 				return err;
 
@@ -893,7 +897,8 @@ int iplink_parse(int argc, char **argv, struct iplink_req *req, char **type)
 			unsigned int proto_down;
 
 			NEXT_ARG();
-			proto_down = parse_on_off("protodown", *argv, &err);
+			proto_down = parse_on_off_deprecated("protodown",
+							     *argv, &err);
 			if (err)
 				return err;
 			addattr8(&req->n, sizeof(*req), IFLA_PROTO_DOWN,

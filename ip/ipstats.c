@@ -1282,7 +1282,8 @@ static int ipstats_set(int argc, char **argv)
 				return -EINVAL;
 			}
 			at = IFLA_STATS_SET_OFFLOAD_XSTATS_L3_STATS;
-			enable = parse_on_off("l3_stats", *argv, &err);
+			enable = parse_on_off_deprecated("l3_stats",
+							 *argv, &err);
 			if (err)
 				return err;
 		} else if (strcmp(*argv, "help") == 0) {

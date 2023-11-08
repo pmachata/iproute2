@@ -319,7 +319,7 @@ static void bridge_slave_parse_on_off(char *arg_name, char *arg_val,
 				      struct nlmsghdr *n, int type)
 {
 	int ret;
-	__u8 val = parse_on_off(arg_name, arg_val, &ret);
+	__u8 val = parse_on_off_deprecated(arg_name, arg_val, &ret);
 
 	if (ret)
 		exit(1);

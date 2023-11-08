@@ -61,7 +61,8 @@ static int dcb_ets_parse_mapping_tc_tsa(__u32 key, char *value, void *data)
 	__u8 tsa;
 	int ret;
 
-	tsa = parse_one_of("TSA", value, tsa_names, ARRAY_SIZE(tsa_names), &ret);
+	tsa = parse_one_of_deprecated("TSA", value, tsa_names,
+				      ARRAY_SIZE(tsa_names), &ret);
 	if (ret)
 		return ret;
 
@@ -274,7 +275,8 @@ static int dcb_cmd_ets_set(struct dcb *dcb, const char *dev, int argc, char **ar
 			return 0;
 		} else if (matches(*argv, "willing") == 0) {
 			NEXT_ARG();
-			ets.willing = parse_on_off("willing", *argv, &ret);
+			ets.willing = parse_on_off_deprecated("willing",
+							      *argv, &ret);
 			if (ret)
 				return ret;
 		} else if (matches(*argv, "tc-tsa") == 0) {
