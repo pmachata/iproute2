@@ -361,8 +361,8 @@ static int vlan_option_set(int argc, char **argv)
 			int ret;
 
 			NEXT_ARG();
-			neigh_suppress = parse_on_off("neigh_suppress", *argv,
-						      &ret);
+			neigh_suppress = parse_on_off_deprecated("neigh_suppress",
+								 *argv, &ret);
 			if (ret)
 				return ret;
 			addattr8(&req.n, sizeof(req),

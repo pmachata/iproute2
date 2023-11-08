@@ -1755,6 +1755,12 @@ __parse_one_of(const char *msg, const char *realval,
 int parse_one_of(const char *msg, const char *realval, const char * const *list,
 		 size_t len, int *p_err)
 {
+	return __parse_one_of(msg, realval, list, len, p_err, strcmp);
+}
+
+int parse_one_of_deprecated(const char *msg, const char *realval,
+			    const char * const *list, size_t len, int *p_err)
+{
 	return __parse_one_of(msg, realval, list, len, p_err, matches);
 }
 
@@ -1768,6 +1774,11 @@ static bool __parse_on_off(const char *msg, const char *realval, int *p_err,
 }
 
 bool parse_on_off(const char *msg, const char *realval, int *p_err)
+{
+	return __parse_on_off(msg, realval, p_err, strcmp);
+}
+
+bool parse_on_off_deprecated(const char *msg, const char *realval, int *p_err)
 {
 	return __parse_on_off(msg, realval, p_err, matches);
 }
