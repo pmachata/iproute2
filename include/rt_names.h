@@ -3,6 +3,7 @@
 #define RT_NAMES_H_ 1
 
 #include <asm/types.h>
+#include "sbuf.h"
 
 const char *rtnl_rtprot_n2a(int id, char *buf, int len);
 const char *rtnl_addrprot_n2a(__u8 id, char *buf, int len);
@@ -25,15 +26,21 @@ const char *inet_proto_n2a(int proto, char *buf, int len);
 int inet_proto_a2n(const char *buf);
 
 
-const char * ll_type_n2a(int type, char *buf, int len);
+const char *ll_type_n2a(int type, struct sbuf *sbuf)
+    __attribute__((access(read_write, 2)));
+
 const char *ll_addr_n2a(const unsigned char *addr, int alen,
 			int type, char *buf, int blen);
 int ll_addr_a2n(char *lladdr, int len, const char *arg);
 
-const char * ll_proto_n2a(unsigned short id, char *buf, int len);
+const char *ll_proto_n2a(unsigned short id, struct sbuf *sbuf)
+    __attribute__((access(read_write, 2)));
+
 int ll_proto_a2n(unsigned short *id, const char *buf);
 
-const char *ppp_proto_n2a(unsigned short id, char *buf, int len);
+const char *ppp_proto_n2a(unsigned short id, struct sbuf *sbuf)
+    __attribute__((access(read_write, 2)));
+
 int ppp_proto_a2n(unsigned short *id, const char *buf);
 
 const char *nl_proto_n2a(int id, char *buf, int len);

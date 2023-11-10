@@ -327,17 +327,19 @@ static void iplink_parse_vf_vlan_info(int vf, int *argcp, char ***argvp,
 				invarg("protocol is invalid\n", *argv);
 			if (ivvip->vlan_proto != htons(ETH_P_8021AD) &&
 			    ivvip->vlan_proto != htons(ETH_P_8021Q)) {
-				SPRINT_BUF(b1);
-				SPRINT_BUF(b2);
-				char msg[64 + sizeof(b1) + sizeof(b2)];
+				struct sbuf sb1 = {};
+				struct sbuf sb2 = {};
+				struct sbuf msg = {};
 
-				sprintf(msg,
-					"Invalid \"vlan protocol\" value - supported %s, %s\n",
-					ll_proto_n2a(htons(ETH_P_8021Q),
-					     b1, sizeof(b1)),
-					ll_proto_n2a(htons(ETH_P_8021AD),
-					     b2, sizeof(b2)));
-				invarg(msg, *argv);
+				sbuf_fmt(&msg,
+					 "Invalid \"vlan protocol\" value - supported %s, %s\n",
+					 ll_proto_n2a(htons(ETH_P_8021Q), &sb1),
+					 ll_proto_n2a(htons(ETH_P_8021AD), &sb2));
+				invarg(sbuf_str(&msg), *argv);
+
+				sbuf_free(&msg);
+				sbuf_free(&sb2);
+				sbuf_free(&sb1);
 			}
 		} else {
 			/* rewind arg */

@@ -84,6 +84,11 @@ sbuf_append_va(struct sbuf *sb, const char *format, va_list va)
 	len = vsnprintf(sbuf_end(sb), sbuf_nleft(sb), format, va2);
 	va_end(va2);
 
+	if (len < 0) {
+		sb->err = -len;
+		return sbuf_str(sb);
+	}
+
 	if (len + 1 > sbuf_nleft(sb)) {
 		rc = sbuf_reserve(sb, len + 1);
 		if (rc)
