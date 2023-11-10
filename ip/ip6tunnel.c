@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
- * Copyright (C)2006 USAGI/WIDE Project
+ * Copyright (C)2006, 2023 USAGI/WIDE Project
  *
  * Author:
  *	Masahide NAKAMURA @USAGI
@@ -58,11 +58,12 @@ static void usage(void)
 static void print_tunnel(const void *t)
 {
 	const struct ip6_tnl_parm2 *p = t;
-	SPRINT_BUF(b1);
 
 	/* Do not use format_host() for local addr,
 	 * symbolic name will not be useful.
 	 */
+	{
+	SPRINT_BUF(b1);
 	open_json_object(NULL);
 	print_color_string(PRINT_ANY, COLOR_IFNAME, "ifname", "%s: ", p->name);
 	snprintf(b1, sizeof(b1), "%s/ipv6", tnl_strproto(p->proto));
@@ -73,6 +74,7 @@ static void print_tunnel(const void *t)
 	print_string(PRINT_FP, NULL, "%s", "local ");
 	print_color_string(PRINT_ANY, COLOR_INET6, "local", "%s",
 			   rt_addr_n2a_r(AF_INET6, 16, &p->laddr, b1, sizeof(b1)));
+	}
 
 	if (p->link) {
 		const char *n = ll_index_to_name(p->link);
@@ -99,8 +101,8 @@ static void print_tunnel(const void *t)
 	} else {
 		__u32 val = ntohl(p->flowinfo & IP6_FLOWINFO_TCLASS);
 
-		snprintf(b1, sizeof(b1), "0x%02x", (__u8)(val >> 20));
-		print_string(PRINT_ANY, "tclass", " tclass %s", b1);
+		print_fmt(PRINT_ANY, "tclass", " tclass %s",
+			  "0x%02x", (__u8)(val >> 20));
 	}
 
 	if (p->flags & IP6_TNL_F_USE_ORIG_FLOWLABEL) {
@@ -109,12 +111,12 @@ static void print_tunnel(const void *t)
 	} else {
 		__u32 val = ntohl(p->flowinfo & IP6_FLOWINFO_FLOWLABEL);
 
-		snprintf(b1, sizeof(b1), "0x%05x", val);
-		print_string(PRINT_ANY, "flowlabel", " flowlabel %s", b1);
+		print_fmt(PRINT_ANY, "flowlabel", " flowlabel %s",
+			  "0x%05x", val);
 	}
 
-	snprintf(b1, sizeof(b1), "0x%08x", ntohl(p->flowinfo));
-	print_string(PRINT_ANY, "flowinfo", " (flowinfo %s)", b1);
+	print_fmt(PRINT_ANY, "flowinfo", " (flowinfo %s)",
+		  "%#08x", ntohl(p->flowinfo));
 
 	if (p->flags & IP6_TNL_F_RCV_DSCP_COPY)
 		print_null(PRINT_ANY, "ip6_tnl_f_rcv_dscp_copy",

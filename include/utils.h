@@ -18,6 +18,7 @@
 #include "ll_map.h"
 #include "rtm_map.h"
 #include "json_print.h"
+#include "sbuf.h"
 
 extern int preferred_family;
 extern int human_readable;
@@ -181,7 +182,7 @@ const char *format_host(int af, int lne, const void *addr);
 #define format_host_rta(af, rta) \
 	format_host(af, RTA_PAYLOAD(rta), RTA_DATA(rta))
 const char *rt_addr_n2a_r(int af, int len, const void *addr,
-			       char *buf, int buflen);
+			  char *buf, int buflen);
 const char *rt_addr_n2a(int af, int len, const void *addr);
 #define rt_addr_n2a_rta(af, rta) \
 	rt_addr_n2a(af, RTA_PAYLOAD(rta), RTA_DATA(rta))
@@ -391,7 +392,7 @@ struct proto {
 
 int proto_a2n(unsigned short *id, const char *buf,
 	      const struct proto *proto_tb, size_t tb_len);
-const char *proto_n2a(unsigned short id, char *buf, int len,
+const char *proto_n2a(unsigned short id, struct sbuf *sb,
 		      const struct proto *proto_tb, size_t tb_len);
 
 #endif /* __UTILS_H__ */

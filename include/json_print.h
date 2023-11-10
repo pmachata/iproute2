@@ -106,6 +106,15 @@ static inline int print_bool_opt(enum output_type type,
 	return print_color_bool_opt(type, COLOR_NONE, key, value, show);
 }
 
+__attribute__((format(printf, 5, 6)))
+int print_color_fmt(enum output_type t, enum color_attr color,
+		    const char *key, const char *field_fmt,
+		    const char *value_fmt, ...);
+
+#define print_fmt(T, KEY, FIELD_FMT, VALUE_FMT, ...)		\
+	print_color_fmt((T), COLOR_NONE, (KEY),			\
+			(FIELD_FMT), (VALUE_FMT), __VA_ARGS__)
+
 /* A backdoor to the size formatter. Please use print_size() instead. */
 char *sprint_size(__u32 sz, char *buf);
 

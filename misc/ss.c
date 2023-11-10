@@ -4312,7 +4312,7 @@ static int unix_show(struct filter *f)
 static int packet_stats_print(struct sockstat *s, const struct filter *f)
 {
 	const char *addr, *port;
-	char ll_name[16];
+	struct sbuf sb = {};
 
 	s->local.family = s->remote.family = AF_PACKET;
 
@@ -4327,7 +4327,7 @@ static int packet_stats_print(struct sockstat *s, const struct filter *f)
 	if (s->prot == 3)
 		addr = "*";
 	else
-		addr = ll_proto_n2a(htons(s->prot), ll_name, sizeof(ll_name));
+		addr = ll_proto_n2a(htons(s->prot), &sb);
 
 	if (s->iface == 0)
 		port = "*";
@@ -4341,6 +4341,7 @@ static int packet_stats_print(struct sockstat *s, const struct filter *f)
 
 	if (show_details)
 		sock_details_print(s);
+	sbuf_free(&sb);
 
 	return 0;
 }

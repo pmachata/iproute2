@@ -291,17 +291,9 @@ static void macvlan_print_opt(struct link_util *lu, FILE *f, struct rtattr *tb[]
 		    RTA_PAYLOAD(rta) < 6)
 			continue;
 		addr = RTA_DATA(rta);
-		if (is_json_context()) {
-			SPRINT_BUF(b1);
-
-			snprintf(b1, sizeof(b1),
-				 "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x", addr[0],
-				 addr[1], addr[2], addr[3], addr[4], addr[5]);
-			print_string(PRINT_JSON, NULL, NULL, b1);
-		} else {
-			fprintf(f, "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x ", addr[0],
-				addr[1], addr[2], addr[3], addr[4], addr[5]);
-		}
+		print_fmt(PRINT_ANY, NULL, "%s ",
+			  "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x",
+			  addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
 	}
 	close_json_array(PRINT_JSON, NULL);
 }

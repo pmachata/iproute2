@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <linux/if_ether.h>
 #include <linux/if_vlan.h>
 
 #include "rt_names.h"
@@ -215,8 +216,7 @@ static void vlan_print_flags(FILE *fp, __u32 flags)
 static void vlan_print_opt(struct link_util *lu, FILE *f, struct rtattr *tb[])
 {
 	struct ifla_vlan_flags *flags;
-
-	SPRINT_BUF(b1);
+	__u16 proto;
 
 	if (!tb)
 		return;
@@ -229,14 +229,17 @@ static void vlan_print_opt(struct link_util *lu, FILE *f, struct rtattr *tb[])
 		return;
 
 	if (tb[IFLA_VLAN_PROTOCOL])
-		print_string(PRINT_ANY,
-			     "protocol",
-			     "protocol %s ",
-			     ll_proto_n2a(
-				     rta_getattr_u16(tb[IFLA_VLAN_PROTOCOL]),
-				     b1, sizeof(b1)));
+		proto = rta_getattr_u16(tb[IFLA_VLAN_PROTOCOL]);
 	else
-		print_string(PRINT_ANY, "protocol", "protocol %s ", "802.1q");
+		proto = htons(ETH_P_8021Q);
+
+	{
+		struct sbuf sb = {};
+
+		print_string(PRINT_ANY, "protocol", "protocol %s ",
+			     ll_proto_n2a(proto, &sb));
+		sbuf_free(&sb);
+	}
 
 	print_uint(PRINT_ANY,
 		   "id",

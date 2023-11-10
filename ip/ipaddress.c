@@ -31,6 +31,7 @@
 #include "ll_map.h"
 #include "ip_common.h"
 #include "color.h"
+#include "sbuf.h"
 
 enum {
 	IPADD_LIST,
@@ -307,8 +308,6 @@ static void print_af_spec(FILE *fp, struct rtattr *af_spec_attr)
 
 	if (tb[IFLA_INET6_ADDR_GEN_MODE]) {
 		__u8 mode = rta_getattr_u8(tb[IFLA_INET6_ADDR_GEN_MODE]);
-		SPRINT_BUF(b1);
-
 		switch (mode) {
 		case IN6_ADDR_GEN_MODE_EUI64:
 			print_string(PRINT_ANY,
@@ -335,11 +334,10 @@ static void print_af_spec(FILE *fp, struct rtattr *af_spec_attr)
 				     "random");
 			break;
 		default:
-			snprintf(b1, sizeof(b1), "%#.2hhx", mode);
-			print_string(PRINT_ANY,
-				     "inet6_addr_gen_mode",
-				     "addrgenmode %s ",
-				     b1);
+			print_fmt(PRINT_ANY,
+				  "inet6_addr_gen_mode",
+				  "addrgenmode %s ",
+				  "%#.2hhx", mode);
 			break;
 		}
 	}
@@ -353,7 +351,7 @@ static void print_vfinfo(FILE *fp, struct ifinfomsg *ifi, struct rtattr *vfinfo)
 	struct ifla_vf_broadcast *vf_broadcast;
 	struct ifla_vf_tx_rate *vf_tx_rate;
 	struct rtattr *vf[IFLA_VF_MAX + 1] = {};
-
+	struct sbuf sb = {};
 	SPRINT_BUF(b1);
 
 	if (vfinfo->rta_type != IFLA_VF_INFO) {
@@ -373,7 +371,7 @@ static void print_vfinfo(FILE *fp, struct ifinfomsg *ifi, struct rtattr *vfinfo)
 	print_string(PRINT_ANY,
 		     "link_type",
 		     "    link/%s ",
-		     ll_type_n2a(ifi->ifi_type, b1, sizeof(b1)));
+		     ll_type_n2a(ifi->ifi_type, &sb));
 
 	print_color_string(PRINT_ANY, COLOR_MAC,
 			   "address", "%s",
@@ -408,7 +406,6 @@ static void print_vfinfo(FILE *fp, struct ifinfomsg *ifi, struct rtattr *vfinfo)
 		for (i = RTA_DATA(vfvlanlist);
 		     RTA_OK(i, rem); i = RTA_NEXT(i, rem)) {
 			struct ifla_vf_vlan_info *vf_vlan_info = RTA_DATA(i);
-			SPRINT_BUF(b2);
 
 			open_json_object(NULL);
 			if (vf_vlan_info->vlan)
@@ -428,7 +425,7 @@ static void print_vfinfo(FILE *fp, struct ifinfomsg *ifi, struct rtattr *vfinfo)
 					     ", vlan protocol %s",
 					     ll_proto_n2a(
 						     vf_vlan_info->vlan_proto,
-						     b2, sizeof(b2)));
+						     &sb));
 			close_json_object();
 		}
 		close_json_array(PRINT_JSON, NULL);
@@ -543,6 +540,8 @@ static void print_vfinfo(FILE *fp, struct ifinfomsg *ifi, struct rtattr *vfinfo)
 
 	if (vf[IFLA_VF_STATS] && show_stats)
 		print_vf_stats64(fp, vf[IFLA_VF_STATS]);
+
+	sbuf_free(&sb);
 }
 
 void size_columns(unsigned int cols[], unsigned int n, ...)
@@ -1106,11 +1105,13 @@ int print_linkinfo(struct nlmsghdr *n, void *arg)
 		print_link_event(fp, rta_getattr_u32(tb[IFLA_EVENT]));
 
 	if (!filter.family || filter.family == AF_PACKET || show_details) {
+		struct sbuf sb = {};
+
 		print_nl();
 		print_string(PRINT_ANY,
 			     "link_type",
 			     "    link/%s ",
-			     ll_type_n2a(ifi->ifi_type, b1, sizeof(b1)));
+			     ll_type_n2a(ifi->ifi_type, &sb));
 		if (tb[IFLA_ADDRESS]) {
 			print_color_string(PRINT_ANY,
 					   COLOR_MAC,
@@ -1156,6 +1157,8 @@ int print_linkinfo(struct nlmsghdr *n, void *arg)
 							       b1, sizeof(b1)));
 			}
 		}
+
+		sbuf_free(&sb);
 	}
 
 	if (tb[IFLA_LINK_NETNSID]) {
@@ -1474,17 +1477,8 @@ static void print_ifa_flags(FILE *fp, const struct ifaddrmsg *ifa,
 		flags &= ~flag_data->mask;
 	}
 
-	if (flags) {
-		if (is_json_context()) {
-			SPRINT_BUF(b1);
-
-			snprintf(b1, sizeof(b1), "%02x", flags);
-			print_string(PRINT_JSON, "ifa_flags", NULL, b1);
-		} else {
-			fprintf(fp, "flags %02x ", flags);
-		}
-	}
-
+	if (flags)
+		print_fmt(PRINT_ANY, "ifa_flags", "flags %s ", "%02x", flags);
 }
 
 static int get_filter(const char *arg)

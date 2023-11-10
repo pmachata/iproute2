@@ -231,6 +231,7 @@ static int print_vlan(struct action_util *au, FILE *f, struct rtattr *arg)
 {
 	SPRINT_BUF(b1);
 	struct rtattr *tb[TCA_VLAN_MAX + 1];
+	struct sbuf sb = {};
 	__u16 val;
 	struct tc_vlan *parm;
 
@@ -261,7 +262,7 @@ static int print_vlan(struct action_util *au, FILE *f, struct rtattr *arg)
 
 			proto = rta_getattr_u16(tb[TCA_VLAN_PUSH_VLAN_PROTOCOL]);
 			print_string(PRINT_ANY, "protocol", " protocol %s",
-				     ll_proto_n2a(proto, b1, sizeof(b1)));
+				     ll_proto_n2a(proto, &sb));
 		}
 		if (tb[TCA_VLAN_PUSH_VLAN_PRIORITY]) {
 			val = rta_getattr_u8(tb[TCA_VLAN_PUSH_VLAN_PRIORITY]);
@@ -298,6 +299,7 @@ static int print_vlan(struct action_util *au, FILE *f, struct rtattr *arg)
 	}
 
 	print_nl();
+	sbuf_free(&sb);
 
 	return 0;
 }
