@@ -1475,14 +1475,10 @@ static void print_ifa_flags(FILE *fp, const struct ifaddrmsg *ifa,
 	}
 
 	if (flags) {
-		if (is_json_context()) {
-			SPRINT_BUF(b1);
+		SPRINT_BUF(b1);
 
-			snprintf(b1, sizeof(b1), "%02x", flags);
-			print_string(PRINT_JSON, "ifa_flags", NULL, b1);
-		} else {
-			fprintf(fp, "flags %02x ", flags);
-		}
+		snprintf(b1, sizeof(b1), "%02x", flags);
+		print_string(PRINT_ANY, "ifa_flags", "flags %s ", b1);
 	}
 
 }
