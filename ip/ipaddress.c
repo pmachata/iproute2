@@ -308,8 +308,6 @@ static void print_af_spec(FILE *fp, struct rtattr *af_spec_attr)
 
 	if (tb[IFLA_INET6_ADDR_GEN_MODE]) {
 		__u8 mode = rta_getattr_u8(tb[IFLA_INET6_ADDR_GEN_MODE]);
-		SPRINT_BUF(b1);
-
 		switch (mode) {
 		case IN6_ADDR_GEN_MODE_EUI64:
 			print_string(PRINT_ANY,
@@ -336,11 +334,10 @@ static void print_af_spec(FILE *fp, struct rtattr *af_spec_attr)
 				     "random");
 			break;
 		default:
-			snprintf(b1, sizeof(b1), "%#.2hhx", mode);
-			print_string(PRINT_ANY,
-				     "inet6_addr_gen_mode",
-				     "addrgenmode %s ",
-				     b1);
+			print_fmt(PRINT_ANY,
+				  "inet6_addr_gen_mode",
+				  "addrgenmode %s ",
+				  "%#.2hhx", mode);
 			break;
 		}
 	}
@@ -1480,13 +1477,8 @@ static void print_ifa_flags(FILE *fp, const struct ifaddrmsg *ifa,
 		flags &= ~flag_data->mask;
 	}
 
-	if (flags) {
-		SPRINT_BUF(b1);
-
-		snprintf(b1, sizeof(b1), "%02x", flags);
-		print_string(PRINT_ANY, "ifa_flags", "flags %s ", b1);
-	}
-
+	if (flags)
+		print_fmt(PRINT_ANY, "ifa_flags", "flags %s ", "%02x", flags);
 }
 
 static int get_filter(const char *arg)
