@@ -37,11 +37,14 @@ static const struct proto ppp_proto_names[] = {
 	{PPP_CBCP, "cbcp"},
 };
 
-const char *ppp_proto_n2a(unsigned short id, char *buf, int len)
+const char *ppp_proto_n2a(unsigned short id, struct sbuf *sb)
 {
 	size_t len_tb = ARRAY_SIZE(ppp_proto_names);
+	const char *ret;
+	SPRINT_BUF(b1);
 
-	return proto_n2a(id, buf, len, ppp_proto_names, len_tb);
+	ret = proto_n2a(id, b1, sizeof(b1), ppp_proto_names, len_tb);
+	return sbuf_fmt(sb, "%s", ret);
 }
 
 int ppp_proto_a2n(unsigned short *id, const char *buf)

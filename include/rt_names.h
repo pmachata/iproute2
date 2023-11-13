@@ -34,7 +34,7 @@ int ll_addr_a2n(char *lladdr, int len, const char *arg);
 const char *ll_proto_n2a(unsigned short id, struct sbuf *sbuf);
 int ll_proto_a2n(unsigned short *id, const char *buf);
 
-const char *ppp_proto_n2a(unsigned short id, char *buf, int len);
+const char *ppp_proto_n2a(unsigned short id, struct sbuf *sbuf);
 int ppp_proto_a2n(unsigned short *id, const char *buf);
 
 const char *nl_proto_n2a(int id, char *buf, int len);

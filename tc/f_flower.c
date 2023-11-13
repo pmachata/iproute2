@@ -3085,13 +3085,11 @@ static int flower_print_opt(struct filter_util *qu, FILE *f,
 	}
 
 	if (tb[TCA_FLOWER_KEY_PPP_PROTO]) {
-		SPRINT_BUF(buf);
 		struct rtattr *attr = tb[TCA_FLOWER_KEY_PPP_PROTO];
 
 		print_nl();
 		print_string(PRINT_ANY, "ppp_proto", "  ppp_proto %s",
-			     ppp_proto_n2a(rta_getattr_u16(attr),
-			     buf, sizeof(buf)));
+			     ppp_proto_n2a(rta_getattr_u16(attr), &sb));
 	}
 
 	flower_print_ip_addr("enc_dst_ip",
