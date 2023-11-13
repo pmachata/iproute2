@@ -99,8 +99,8 @@ static void print_tunnel(const void *t)
 	} else {
 		__u32 val = ntohl(p->flowinfo & IP6_FLOWINFO_TCLASS);
 
-		snprintf(b1, sizeof(b1), "0x%02x", (__u8)(val >> 20));
-		print_string(PRINT_ANY, "tclass", " tclass %s", b1);
+		print_fmt(PRINT_ANY, "tclass", " tclass %s",
+			  "0x%02x", (__u8)(val >> 20));
 	}
 
 	if (p->flags & IP6_TNL_F_USE_ORIG_FLOWLABEL) {
@@ -109,12 +109,12 @@ static void print_tunnel(const void *t)
 	} else {
 		__u32 val = ntohl(p->flowinfo & IP6_FLOWINFO_FLOWLABEL);
 
-		snprintf(b1, sizeof(b1), "0x%05x", val);
-		print_string(PRINT_ANY, "flowlabel", " flowlabel %s", b1);
+		print_fmt(PRINT_ANY, "flowlabel", " flowlabel %s",
+			  "0x%05x", val);
 	}
 
-	snprintf(b1, sizeof(b1), "0x%08x", ntohl(p->flowinfo));
-	print_string(PRINT_ANY, "flowinfo", " (flowinfo %s)", b1);
+	print_fmt(PRINT_ANY, "flowinfo", " (flowinfo %s)",
+		  "%#08x", ntohl(p->flowinfo));
 
 	if (p->flags & IP6_TNL_F_RCV_DSCP_COPY)
 		print_null(PRINT_ANY, "ip6_tnl_f_rcv_dscp_copy",
