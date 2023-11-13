@@ -18,6 +18,7 @@
 #include "ll_map.h"
 #include "rtm_map.h"
 #include "json_print.h"
+#include "sbuf.h"
 
 extern int preferred_family;
 extern int human_readable;
@@ -391,7 +392,7 @@ struct proto {
 
 int proto_a2n(unsigned short *id, const char *buf,
 	      const struct proto *proto_tb, size_t tb_len);
-const char *proto_n2a(unsigned short id, char *buf, int len,
+const char *proto_n2a(unsigned short id, struct sbuf *sb,
 		      const struct proto *proto_tb, size_t tb_len);
 
 #endif /* __UTILS_H__ */

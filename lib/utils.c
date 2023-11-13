@@ -1963,7 +1963,7 @@ void print_indent(struct indent_mem *mem)
 		printf("%s", mem->indent_str);
 }
 
-const char *proto_n2a(unsigned short id, char *buf, int len,
+const char *proto_n2a(unsigned short id, struct sbuf *sb,
 		      const struct proto *proto_tb, size_t tb_len)
 {
 	int i;
@@ -1975,9 +1975,7 @@ const char *proto_n2a(unsigned short id, char *buf, int len,
 			return proto_tb[i].name;
 	}
 
-	snprintf(buf, len, "[%d]", id);
-
-	return buf;
+	return sbuf_fmt(sb, "[%d]", id);
 }
 
 int proto_a2n(unsigned short *id, const char *buf,
