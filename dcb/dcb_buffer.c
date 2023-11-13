@@ -7,6 +7,7 @@
 
 #include "dcb.h"
 #include "utils.h"
+#include "sbuf.h"
 
 static void dcb_buffer_help_set(void)
 {
@@ -87,16 +88,15 @@ static void dcb_buffer_print_prio_buffer(const struct dcbnl_buffer *buffer)
 static void dcb_buffer_print_buffer_size(const struct dcbnl_buffer *buffer)
 {
 	size_t size = ARRAY_SIZE(buffer->buffer_size);
-	SPRINT_BUF(b);
+	struct sbuf sb = {};
 	size_t i;
 
 	open_json_array(PRINT_JSON, "buffer_size");
 	print_string(PRINT_FP, NULL, "buffer-size ", NULL);
 
-	for (i = 0; i < size; i++) {
-		snprintf(b, sizeof(b), "%zd:%%s ", i);
-		print_size(PRINT_ANY, NULL, b, buffer->buffer_size[i]);
-	}
+	for (i = 0; i < size; i++)
+		print_size(PRINT_ANY, NULL, sbuf_fmt(&sb, "%zd:%%s ", i),
+			   buffer->buffer_size[i]);
 
 	close_json_array(PRINT_JSON, "buffer_size");
 }
