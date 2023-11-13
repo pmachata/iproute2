@@ -10,6 +10,7 @@
 
 #include "utils.h"
 #include "json_print.h"
+#include "sbuf.h"
 
 static json_writer_t *_jw;
 
@@ -372,5 +373,29 @@ int print_color_rate(bool use_iec, enum output_type type, enum color_attr color,
 
 	rc = print_color_string(type, color, key, fmt, buf);
 	free(buf);
+	return rc;
+}
+
+static int vprint_color_fmt(enum output_type t, enum color_attr color,
+			    const char *key, const char *field_fmt,
+			    const char *value_fmt, va_list va)
+{
+	struct sbuf sb = {};
+
+	return print_color_string(t, color, key, field_fmt,
+				  sbuf_va(&sb, value_fmt, va));
+}
+
+int print_color_fmt(enum output_type t, enum color_attr color,
+		    const char *key, const char *field_fmt,
+		    const char *value_fmt, ...)
+{
+	va_list va;
+	int rc;
+
+	va_start(va, value_fmt);
+	rc = vprint_color_fmt(t, color, key, field_fmt, value_fmt, va);
+	va_end(va);
+
 	return rc;
 }
