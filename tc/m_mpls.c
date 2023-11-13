@@ -215,7 +215,7 @@ static int print_mpls(struct action_util *au, FILE *f, struct rtattr *arg)
 {
 	struct rtattr *tb[TCA_MPLS_MAX + 1];
 	struct tc_mpls *parm;
-	SPRINT_BUF(b1);
+	struct sbuf sb = {};
 	__u32 val;
 
 	print_string(PRINT_ANY, "kind", "%s ", "mpls");
@@ -240,7 +240,7 @@ static int print_mpls(struct action_util *au, FILE *f, struct rtattr *arg)
 
 			proto = rta_getattr_u16(tb[TCA_MPLS_PROTO]);
 			print_string(PRINT_ANY, "protocol", " protocol %s",
-				     ll_proto_n2a(proto, b1, sizeof(b1)));
+				     ll_proto_n2a(proto, &sb));
 		}
 		break;
 	case TCA_MPLS_ACT_PUSH:
@@ -250,7 +250,7 @@ static int print_mpls(struct action_util *au, FILE *f, struct rtattr *arg)
 
 			proto = rta_getattr_u16(tb[TCA_MPLS_PROTO]);
 			print_string(PRINT_ANY, "protocol", " protocol %s",
-				     ll_proto_n2a(proto, b1, sizeof(b1)));
+				     ll_proto_n2a(proto, &sb));
 		}
 		/* Fallthrough */
 	case TCA_MPLS_ACT_MODIFY:
@@ -289,6 +289,7 @@ static int print_mpls(struct action_util *au, FILE *f, struct rtattr *arg)
 
 	print_nl();
 
+	sbuf_free(&sb);
 	return 0;
 }
 

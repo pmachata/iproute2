@@ -216,9 +216,8 @@ static void vlan_print_flags(FILE *fp, __u32 flags)
 static void vlan_print_opt(struct link_util *lu, FILE *f, struct rtattr *tb[])
 {
 	struct ifla_vlan_flags *flags;
+	struct sbuf sb = {};
 	__u16 proto;
-
-	SPRINT_BUF(b1);
 
 	if (!tb)
 		return;
@@ -238,7 +237,7 @@ static void vlan_print_opt(struct link_util *lu, FILE *f, struct rtattr *tb[])
 	print_string(PRINT_ANY,
 		     "protocol",
 		     "protocol %s ",
-		     ll_proto_n2a(proto, b1, sizeof(b1)));
+		     ll_proto_n2a(proto, &sb));
 
 	print_uint(PRINT_ANY,
 		   "id",
@@ -247,7 +246,7 @@ static void vlan_print_opt(struct link_util *lu, FILE *f, struct rtattr *tb[])
 
 	if (tb[IFLA_VLAN_FLAGS]) {
 		if (RTA_PAYLOAD(tb[IFLA_VLAN_FLAGS]) < sizeof(*flags))
-			return;
+			goto out;
 		flags = RTA_DATA(tb[IFLA_VLAN_FLAGS]);
 		vlan_print_flags(f, flags->flags);
 	}
@@ -261,6 +260,9 @@ static void vlan_print_opt(struct link_util *lu, FILE *f, struct rtattr *tb[])
 			       "egress_qos",
 			       "egress-qos-map",
 			       tb[IFLA_VLAN_EGRESS_QOS]);
+
+out:
+	sbuf_free(&sb);
 }
 
 static void vlan_print_help(struct link_util *lu, int argc, char **argv,

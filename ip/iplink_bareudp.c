@@ -120,11 +120,11 @@ static void bareudp_print_opt(struct link_util *lu, FILE *f,
 
 	if (tb[IFLA_BAREUDP_ETHERTYPE]) {
 		struct rtattr *attr = tb[IFLA_BAREUDP_ETHERTYPE];
-		SPRINT_BUF(ethertype);
+		struct sbuf sb = {};
 
 		print_string(PRINT_ANY, "ethertype", "ethertype %s ",
-			     ll_proto_n2a(rta_getattr_u16(attr),
-					  ethertype, sizeof(ethertype)));
+			     ll_proto_n2a(rta_getattr_u16(attr), &sb));
+		sbuf_free(&sb);
 	}
 
 	if (tb[IFLA_BAREUDP_SRCPORT_MIN])

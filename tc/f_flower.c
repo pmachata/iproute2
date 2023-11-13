@@ -2890,6 +2890,7 @@ static int flower_print_opt(struct filter_util *qu, FILE *f,
 	int nl_type, nl_mask_type;
 	__be16 eth_type = 0;
 	__u8 ip_proto = 0xff;
+	struct sbuf sb = {};
 
 	if (!opt)
 		return 0;
@@ -2948,13 +2949,11 @@ static int flower_print_opt(struct filter_util *qu, FILE *f,
 	}
 
 	if (tb[TCA_FLOWER_KEY_VLAN_ETH_TYPE]) {
-		SPRINT_BUF(buf);
 		struct rtattr *attr = tb[TCA_FLOWER_KEY_VLAN_ETH_TYPE];
 
 		print_nl();
 		print_string(PRINT_ANY, "vlan_ethtype", "  vlan_ethtype %s",
-			     ll_proto_n2a(rta_getattr_u16(attr),
-			     buf, sizeof(buf)));
+			     ll_proto_n2a(rta_getattr_u16(attr), &sb));
 	}
 
 	if (tb[TCA_FLOWER_KEY_CVLAN_ID]) {
@@ -2974,13 +2973,11 @@ static int flower_print_opt(struct filter_util *qu, FILE *f,
 	}
 
 	if (tb[TCA_FLOWER_KEY_CVLAN_ETH_TYPE]) {
-		SPRINT_BUF(buf);
 		struct rtattr *attr = tb[TCA_FLOWER_KEY_CVLAN_ETH_TYPE];
 
 		print_nl();
 		print_string(PRINT_ANY, "cvlan_ethtype", "  cvlan_ethtype %s",
-			     ll_proto_n2a(rta_getattr_u16(attr),
-			     buf, sizeof(buf)));
+			     ll_proto_n2a(rta_getattr_u16(attr), &sb));
 	}
 
 	flower_print_eth_addr("dst_mac", tb[TCA_FLOWER_KEY_ETH_DST],
@@ -3180,6 +3177,7 @@ static int flower_print_opt(struct filter_util *qu, FILE *f,
 	if (tb[TCA_FLOWER_ACT])
 		tc_print_action(f, tb[TCA_FLOWER_ACT], 0);
 
+	sbuf_free(&sb);
 	return 0;
 }
 

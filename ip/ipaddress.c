@@ -353,7 +353,7 @@ static void print_vfinfo(FILE *fp, struct ifinfomsg *ifi, struct rtattr *vfinfo)
 	struct ifla_vf_broadcast *vf_broadcast;
 	struct ifla_vf_tx_rate *vf_tx_rate;
 	struct rtattr *vf[IFLA_VF_MAX + 1] = {};
-
+	struct sbuf sb = {};
 	SPRINT_BUF(b1);
 
 	if (vfinfo->rta_type != IFLA_VF_INFO) {
@@ -408,7 +408,6 @@ static void print_vfinfo(FILE *fp, struct ifinfomsg *ifi, struct rtattr *vfinfo)
 		for (i = RTA_DATA(vfvlanlist);
 		     RTA_OK(i, rem); i = RTA_NEXT(i, rem)) {
 			struct ifla_vf_vlan_info *vf_vlan_info = RTA_DATA(i);
-			SPRINT_BUF(b2);
 
 			open_json_object(NULL);
 			if (vf_vlan_info->vlan)
@@ -428,7 +427,7 @@ static void print_vfinfo(FILE *fp, struct ifinfomsg *ifi, struct rtattr *vfinfo)
 					     ", vlan protocol %s",
 					     ll_proto_n2a(
 						     vf_vlan_info->vlan_proto,
-						     b2, sizeof(b2)));
+						     &sb));
 			close_json_object();
 		}
 		close_json_array(PRINT_JSON, NULL);
@@ -543,6 +542,8 @@ static void print_vfinfo(FILE *fp, struct ifinfomsg *ifi, struct rtattr *vfinfo)
 
 	if (vf[IFLA_VF_STATS] && show_stats)
 		print_vf_stats64(fp, vf[IFLA_VF_STATS]);
+
+	sbuf_free(&sb);
 }
 
 void size_columns(unsigned int cols[], unsigned int n, ...)

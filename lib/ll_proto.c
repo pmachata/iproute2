@@ -86,11 +86,14 @@ __PF(CFM,cfm)
 };
 #undef __PF
 
-const char *ll_proto_n2a(unsigned short id, char *buf, int len)
+const char *ll_proto_n2a(unsigned short id, struct sbuf *sb)
 {
 	size_t len_tb = ARRAY_SIZE(llproto_names);
+	const char *ret;
+	SPRINT_BUF(b1);
 
-	return proto_n2a(id, buf, len, llproto_names, len_tb);
+	ret = proto_n2a(id, b1, sizeof(b1), llproto_names, len_tb);
+	return sbuf_fmt(sb, "%s", ret);
 }
 
 int ll_proto_a2n(unsigned short *id, const char *buf)

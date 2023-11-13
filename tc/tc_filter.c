@@ -325,10 +325,12 @@ int print_filter(struct nlmsghdr *n, void *arg)
 
 		if (!filter_protocol || filter_protocol != f_proto) {
 			if (f_proto) {
-				SPRINT_BUF(b1);
+				struct sbuf sb = {};
+
 				print_string(PRINT_ANY, "protocol",
 					     "protocol %s ",
-					     ll_proto_n2a(f_proto, b1, sizeof(b1)));
+					     ll_proto_n2a(f_proto, &sb));
+				sbuf_free(&sb);
 			}
 		}
 		if (!filter_prio || filter_prio != prio) {

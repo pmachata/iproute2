@@ -439,6 +439,8 @@ static void _bridge_print_timer(FILE *f,
 
 static void bridge_print_opt(struct link_util *lu, FILE *f, struct rtattr *tb[])
 {
+	struct sbuf sb = {};
+
 	if (!tb)
 		return;
 
@@ -484,15 +486,12 @@ static void bridge_print_opt(struct link_util *lu, FILE *f, struct rtattr *tb[])
 			   "vlan_filtering %u ",
 			   rta_getattr_u8(tb[IFLA_BR_VLAN_FILTERING]));
 
-	if (tb[IFLA_BR_VLAN_PROTOCOL]) {
-		SPRINT_BUF(b1);
-
+	if (tb[IFLA_BR_VLAN_PROTOCOL])
 		print_string(PRINT_ANY,
 			     "vlan_protocol",
 			     "vlan_protocol %s ",
 			     ll_proto_n2a(rta_getattr_u16(tb[IFLA_BR_VLAN_PROTOCOL]),
-					  b1, sizeof(b1)));
-	}
+					  &sb));
 
 	if (tb[IFLA_BR_BRIDGE_ID]) {
 		char bridge_id[32];
@@ -737,6 +736,8 @@ static void bridge_print_opt(struct link_util *lu, FILE *f, struct rtattr *tb[])
 			   "nf_call_arptables",
 			   "nf_call_arptables %u ",
 			   rta_getattr_u8(tb[IFLA_BR_NF_CALL_ARPTABLES]));
+
+	sbuf_free(&sb);
 }
 
 static void bridge_print_help(struct link_util *lu, int argc, char **argv,
