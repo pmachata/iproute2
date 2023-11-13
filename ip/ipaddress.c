@@ -31,6 +31,7 @@
 #include "ll_map.h"
 #include "ip_common.h"
 #include "color.h"
+#include "sbuf.h"
 
 enum {
 	IPADD_LIST,
@@ -373,7 +374,7 @@ static void print_vfinfo(FILE *fp, struct ifinfomsg *ifi, struct rtattr *vfinfo)
 	print_string(PRINT_ANY,
 		     "link_type",
 		     "    link/%s ",
-		     ll_type_n2a(ifi->ifi_type, b1, sizeof(b1)));
+		     ll_type_n2a(ifi->ifi_type, &sb));
 
 	print_color_string(PRINT_ANY, COLOR_MAC,
 			   "address", "%s",
@@ -1107,11 +1108,13 @@ int print_linkinfo(struct nlmsghdr *n, void *arg)
 		print_link_event(fp, rta_getattr_u32(tb[IFLA_EVENT]));
 
 	if (!filter.family || filter.family == AF_PACKET || show_details) {
+		struct sbuf sb = {};
+
 		print_nl();
 		print_string(PRINT_ANY,
 			     "link_type",
 			     "    link/%s ",
-			     ll_type_n2a(ifi->ifi_type, b1, sizeof(b1)));
+			     ll_type_n2a(ifi->ifi_type, &sb));
 		if (tb[IFLA_ADDRESS]) {
 			print_color_string(PRINT_ANY,
 					   COLOR_MAC,
@@ -1157,6 +1160,8 @@ int print_linkinfo(struct nlmsghdr *n, void *arg)
 							       b1, sizeof(b1)));
 			}
 		}
+
+		sbuf_free(&sb);
 	}
 
 	if (tb[IFLA_LINK_NETNSID]) {

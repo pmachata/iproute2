@@ -22,7 +22,7 @@
 #include "rt_names.h"
 #include "utils.h"
 
-const char *ll_type_n2a(int type, char *buf, int len)
+const char *ll_type_n2a(int type, struct sbuf *sb)
 {
 #define __PF(f,n) { ARPHRD_##f, #n },
 static const struct {
@@ -112,6 +112,6 @@ __PF(VOID, void)
 		if (arphrd_names[i].type == type)
 			return arphrd_names[i].name;
 	}
-	snprintf(buf, len, "[%d]", type);
-	return buf;
+
+	return sbuf_fmt(sb, "[%d]", type);
 }
