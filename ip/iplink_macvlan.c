@@ -16,6 +16,7 @@
 #include "rt_names.h"
 #include "utils.h"
 #include "ip_common.h"
+#include "sfmt.h"
 
 #define pfx_err(lu, ...) {               \
 	fprintf(stderr, "%s: ", lu->id); \
@@ -291,9 +292,13 @@ static void macvlan_print_opt(struct link_util *lu, FILE *f, struct rtattr *tb[]
 		    RTA_PAYLOAD(rta) < 6)
 			continue;
 		addr = RTA_DATA(rta);
-		print_fmt(PRINT_ANY, NULL, "%s ",
-			  "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x",
-			  addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
+
+		{
+			SFMT(b, "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x",
+			     addr[0], addr[1], addr[2],
+			     addr[3], addr[4], addr[5]);
+			print_string(PRINT_ANY, NULL, "%s ", b);
+		}
 	}
 	close_json_array(PRINT_JSON, NULL);
 }

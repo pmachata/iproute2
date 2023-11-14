@@ -31,6 +31,7 @@
 #include "ll_map.h"
 #include "ip_common.h"
 #include "color.h"
+#include "sfmt.h"
 
 enum {
 	IPADD_LIST,
@@ -332,12 +333,13 @@ static void print_af_spec(FILE *fp, struct rtattr *af_spec_attr)
 				     "addrgenmode %s ",
 				     "random");
 			break;
-		default:
-			print_fmt(PRINT_ANY,
-				  "inet6_addr_gen_mode",
-				  "addrgenmode %s ",
-				  "%#.2hhx", mode);
+		default: {
+			SFMT(b, "%#.2hhx", mode);
+			print_string(PRINT_ANY,
+				     "inet6_addr_gen_mode",
+				     "addrgenmode %s ", b);
 			break;
+		}
 		}
 	}
 }
@@ -1471,8 +1473,10 @@ static void print_ifa_flags(FILE *fp, const struct ifaddrmsg *ifa,
 		flags &= ~flag_data->mask;
 	}
 
-	if (flags)
-		print_fmt(PRINT_ANY, "ifa_flags", "flags %s ", "%02x", flags);
+	if (flags) {
+		SFMT(b, "%02x", flags);
+		print_string(PRINT_ANY, "ifa_flags", "flags %s ", b);
+	}
 }
 
 static int get_filter(const char *arg)

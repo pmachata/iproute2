@@ -7,7 +7,7 @@
 
 #include "dcb.h"
 #include "utils.h"
-#include "sbuf.h"
+#include "sfmt.h"
 
 static void dcb_maxrate_help_set(void)
 {
@@ -56,16 +56,17 @@ static int dcb_maxrate_parse_mapping_tc_maxrate(__u32 key, char *value, void *da
 static void dcb_maxrate_print_tc_maxrate(struct dcb *dcb, const struct ieee_maxrate *maxrate)
 {
 	size_t size = ARRAY_SIZE(maxrate->tc_maxrate);
-	struct sbuf sb = {};
 	size_t i;
 
 	open_json_array(PRINT_JSON, "tc_maxrate");
 	print_string(PRINT_FP, NULL, "tc-maxrate ", NULL);
 
-	for (i = 0; i < size; i++)
-		print_rate(dcb->use_iec, PRINT_ANY, NULL,
-			   sbuf_fmt(&sb, "%zd:%%s ", i),
+	for (i = 0; i < size; i++) {
+	        const char *b = ASFMT("%zd:%%s ", i);
+
+		print_rate(dcb->use_iec, PRINT_ANY, NULL, b,
 			   maxrate->tc_maxrate[i]);
+	}
 
 	close_json_array(PRINT_JSON, "tc_maxrate");
 }

@@ -23,6 +23,7 @@
 #include "utils.h"
 #include "tunnel.h"
 #include "ip_common.h"
+#include "sfmt.h"
 
 #define IP6_FLOWINFO_TCLASS	htonl(0x0FF00000)
 #define IP6_FLOWINFO_FLOWLABEL	htonl(0x000FFFFF)
@@ -98,9 +99,9 @@ static void print_tunnel(const void *t)
 			   " tclass inherit", NULL);
 	} else {
 		__u32 val = ntohl(p->flowinfo & IP6_FLOWINFO_TCLASS);
+		SFMT(b, "0x%02x", (__u8)(val >> 20));
 
-		print_fmt(PRINT_ANY, "tclass", " tclass %s",
-			  "0x%02x", (__u8)(val >> 20));
+		print_string(PRINT_ANY, "tclass", " tclass %s", b);
 	}
 
 	if (p->flags & IP6_TNL_F_USE_ORIG_FLOWLABEL) {
@@ -108,13 +109,15 @@ static void print_tunnel(const void *t)
 			   " flowlabel inherit", NULL);
 	} else {
 		__u32 val = ntohl(p->flowinfo & IP6_FLOWINFO_FLOWLABEL);
+		SFMT(b, "0x%05x", val);
 
-		print_fmt(PRINT_ANY, "flowlabel", " flowlabel %s",
-			  "0x%05x", val);
+		print_string(PRINT_ANY, "flowlabel", " flowlabel %s", b);
 	}
 
-	print_fmt(PRINT_ANY, "flowinfo", " (flowinfo %s)",
-		  "%#08x", ntohl(p->flowinfo));
+	{
+	    SFMT(b, "%#08x", ntohl(p->flowinfo));
+	    print_string(PRINT_ANY, "flowinfo", " (flowinfo %s)", b);
+	}
 
 	if (p->flags & IP6_TNL_F_RCV_DSCP_COPY)
 		print_null(PRINT_ANY, "ip6_tnl_f_rcv_dscp_copy",
