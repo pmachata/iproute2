@@ -1752,10 +1752,27 @@ __parse_one_of(const char *msg, const char *realval,
 	return 0;
 }
 
+static int matches_warn(const char *prefix, const char *string)
+{
+	int rc;
+
+	rc = matches(prefix, string);
+	if (rc)
+		return rc;
+
+	if (strlen(prefix) != strlen(string))
+		fprintf(stderr,
+			"WARNING: '%s' matches '%s' by prefix.\n"
+			"Matching by prefix is deprecated in this context, please use the full string.\n",
+			prefix, string);
+
+	return rc;
+}
+
 int parse_one_of(const char *msg, const char *realval, const char * const *list,
 		 size_t len, int *p_err)
 {
-	return __parse_one_of(msg, realval, list, len, p_err, matches);
+	return __parse_one_of(msg, realval, list, len, p_err, matches_warn);
 }
 
 bool parse_on_off(const char *msg, const char *realval, int *p_err)
