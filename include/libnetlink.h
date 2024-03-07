@@ -260,6 +260,12 @@ static inline __u64 rta_getattr_u64(const struct rtattr *rta)
 	memcpy(&tmp, RTA_DATA(rta), sizeof(__u64));
 	return tmp;
 }
+static inline __u64 rta_getattr_uint(const struct rtattr *rta)
+{
+	if (RTA_PAYLOAD(rta) == sizeof(__u32))
+		return rta_getattr_u32(rta);
+	return rta_getattr_u64(rta);
+}
 static inline __s32 rta_getattr_s32(const struct rtattr *rta)
 {
 	return *(__s32 *)RTA_DATA(rta);
