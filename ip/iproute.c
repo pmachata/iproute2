@@ -750,9 +750,14 @@ static void print_rta_multipath(FILE *fp, const struct rtmsg *r,
 			print_string(PRINT_ANY, "dev",
 				     "dev %s ", ll_index_to_name(nh->rtnh_ifindex));
 
-			if (r->rtm_family != AF_MPLS)
-				print_int(PRINT_ANY, "weight",
-					  "weight %d ", nh->rtnh_hops + 1);
+			if (r->rtm_family != AF_MPLS) {
+				__u16 w = nh->rtnh_hops;
+
+				if (w == 256 && tb[RTA_WEIGHT])
+					w = rta_getattr_uint(tb[RTA_WEIGHT]);
+				w += 1;
+				print_int(PRINT_ANY, "weight", "weight %d ", w);
+			}
 		}
 
 		print_rt_flags(fp, nh->rtnh_flags);
