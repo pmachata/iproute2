@@ -654,6 +654,8 @@ the following additional arguments are supported:
 ] [
 .RB [ no ] mcroute
 ] [
+.RB [ no ] mcdev
+] [
 .BI ageing " SECONDS "
 ] [
 .BI maxaddress " NUMBER "
@@ -785,6 +787,16 @@ should be multicast-routed. In the latter case, the physical device acts as a
 source device for purposes of matching a multicast route. There must a be a
 suitable local multicast route, such as 224.0.0.0/4 or ff00::/8 on the
 netdevice.
+
+.sp
+.RB [ no ] mcdev
+- when the VXLAN tunnel has a multicast remote, whether when determining the
+netdevice that should be used for packet transmission, the indicated physical
+netdevice should be used (the default and when \fBmcdev\fR is given). Or (with
+\fBnomcdev\fR) whether no particular netdevice should be given, in which case
+the kernel finds a suitable netdevice based on the tunnel local address, as if
+no \fBdev\fR parameter were given. The physical netdevice is still used for IGMP
+/ MLD join.
 
 .sp
 .BI ageing " SECONDS"
