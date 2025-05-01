@@ -652,6 +652,8 @@ the following additional arguments are supported:
 ] [
 .RB [ no ] localbypass
 ] [
+.RB [ no ] mcroute
+] [
 .BI ageing " SECONDS "
 ] [
 .BI maxaddress " NUMBER "
@@ -774,6 +776,15 @@ packets to the userspace network stack. If there is a userspace process
 listening for these packets, it will have a chance to process them. If
 localbypass is active (default), bypass the kernel network stack and
 inject the packets into the target VXLAN device, assuming one exists.
+
+.sp
+.RB [ no ] mcroute
+- when the VXLAN tunnel has a multicast remote, whether the underlay packets
+should be sent directly to the physical device (the default), or whether they
+should be multicast-routed. In the latter case, the physical device acts as a
+source device for purposes of matching a multicast route. There must a be a
+suitable local multicast route, such as 224.0.0.0/4 or ff00::/8 on the
+netdevice.
 
 .sp
 .BI ageing " SECONDS"
